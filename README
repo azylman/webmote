@@ -1,0 +1,18 @@
+WHICH LICENSE HERE???
+
+This project is intended to bridge the gap between the IR remote and the web connected world.  
+At its heart is a linux webserver using a pair of xbees to send IR commands wirelessly between transcievers and the web server.  Each transciever has an IR LED for send signals to IR controlled devices.  Additionally, each transciever has an IR phototransistor for recieving commands for remotes to be saved to the webserver and used later.  Ultimately, the webserver will allow any IR device to be controlled from anywhere on any device with a browser.
+
+Tasks:
+Proof of concept 2-way xbee communication - Done
+Add IR LED and phototransistor to transciever 
+Build a simple web server to prove web control-to xbee link
+
+
+Hardware Design
+
+
+
+Software Design
+
+
