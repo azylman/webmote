@@ -1,18 +1,52 @@
+####################
 WHICH LICENSE HERE???
+####################
 
-This project is intended to bridge the gap between the IR remote and the web connected world.  
-At its heart is a linux webserver using a pair of xbees to send IR commands wirelessly between transcievers and the web server.  Each transciever has an IR LED for send signals to IR controlled devices.  Additionally, each transciever has an IR phototransistor for recieving commands for remotes to be saved to the webserver and used later.  Ultimately, the webserver will allow any IR device to be controlled from anywhere on any device with a browser.
 
+This project is intended to bridge the gap between the IR remote and the web connected world.  At its core is a linux webserver using a pair of xbees to send IR commands wirelessly between transcievers and a web server.  
+
+
+**********************
+Webserver Description:
+**********************
+
+************************
+Transciever Description:
+************************
+
+Each transciever will be based on an arduino with an xbee shield and a 60mW xbee.  Additionally they will have an IR LED and an IR phototransistor.
+
+
+******
 Tasks:
-Proof of concept 2-way xbee communication - Done
-Add IR LED and phototransistor to transciever 
-Build a simple web server to prove web control-to xbee link
+******
 
+-Proof of concept 2-way xbee communication - Done
+-Add IR LED and phototransistor to transciever 
+-Build a simple web server to prove web control-to xbee link
 
-Hardware Design
+***************
+Modus Operandi:
+***************
 
+Pairing a Transciever (priliminary idea):
+-The transciever will send out a request for an ID.
+-The server will respond by issuing a message with format:
+ "messageDestination=0,commandType=a,transceiverID=X"
+ where X is an integer.
+-The webserver will then prompt the admin next time they go on to the site to fill in the info for their transciever.
+-Once the information has been submitted the server will send over the transcieverName to the transceiver.
 
+--Thoughts - we have not figured out security - should this be done first or before...
 
-Software Design
+Playing a Command:
+-The server gets a request from the user to play a command and sends a message with format:
+ "messageDestination=[transcieverID],commandType=p,command=[IRCODE]"
+
+Recording a Command:
+-The server gets a request from the user to record a command and sends a message with format: 
+ "messageDestintation=[transceiverID],commandType=r
+-The transceiver then turns on its recording light and waits for an IR signal.  
+-After recording the signal the tranceiver sends a signal back to the server where it is saved.
 
 
