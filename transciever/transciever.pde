@@ -12,13 +12,15 @@ Refer to the README file in the webmote directory.
 
 */
 
+#include <EEPROM.h>
+#define recordWaitTime 3 //in minutes
 
 int LED = 10;
 int PT = 11;
 
 String message;
 int commandType;
-String command;
+String data;
 int messageDestination;
 int transceiverID = 0;
 String transceiverName;
@@ -55,15 +57,27 @@ void requestID() {
   delay(5000); //make sure we don't flood the server
 }
 
-void restoreID() {}
+void restoreID() {
+  transceiverID = EEPROM.read(0);
+}
 
-void parseMessage(String message) {}
+void parseMessage(String message) {
+  messageDestination = int(message[0]);
+  commandType = message[1];
+  data = message.substring(2);
+}
 
-void playCommand() {}
+void playCommand() {
+  // Need to know a bit more about IR signaling.
+  
+}
 
-void recordCommand() {}
+void recordCommand() {
+  unsigned long time = 0;
+  while (time <
+}
 
 void assignID() {
-// This function should save the ID and Name to EEPROM
+  EEPROM.write(0, int(data));
 }
 

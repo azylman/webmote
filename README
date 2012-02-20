@@ -32,7 +32,8 @@ Modus Operandi:
 Pairing a Transciever (priliminary idea):
 -The transciever will send out a request for an ID.
 -The server will respond by issuing a message with format:
- "messageDestination=0,commandType=a,transceiverID=X"
+ "0,a,X"
+ [messageDestination=0,commandType=a,transceiverID=XXXX]
  where X is an integer.
 -The webserver will then prompt the admin next time they go on to the site to fill in the info for their transciever.
 -Once the information has been submitted the server will send over the transcieverName to the transceiver.
@@ -41,11 +42,13 @@ Pairing a Transciever (priliminary idea):
 
 Playing a Command:
 -The server gets a request from the user to play a command and sends a message with format:
- "messageDestination=[transcieverID],commandType=p,command=[IRCODE]"
+ "X,p,Y"
+ [messageDestination=X,commandType=p,command=Y]
 
 Recording a Command:
 -The server gets a request from the user to record a command and sends a message with format: 
- "messageDestintation=[transceiverID],commandType=r
+ "X,r,Y"
+ [messageDestination=X,commandType=r,command=Y]
 -The transceiver then turns on its recording light and waits for an IR signal.  
 -After recording the signal the tranceiver sends a signal back to the server where it is saved.
 
