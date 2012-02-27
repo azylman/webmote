@@ -1,4 +1,4 @@
 #!/bin/bash
 cd server/webmote_django
-python manage.py runserver localhost:8080
+python manage.py runserver 0.0.0.0:8080
 

@@ -1,0 +1,53 @@
+<html>
+<!--
+Authors: Daniel Myers
+
+-->
+<head>
+    <title>Home Control</title>
+    <script language="javascript" SRC="framework/main.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.css" />
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.js"></script> 
+
+    <!-- Attach Appropriate css -->
+    <!--    <link rel="stylesheet" type="text/css" href="framework/mobile.css">
+    -->
+</head>
+
+<body>
+    <div data-role="page" id="home">
+        <div data-role="header">
+            <a href="/logout/" data-icon="delete">Logout</a>
+            <h1>Home Automater</h1>
+        </div><!-- /header -->
+        <div data-role="content">	
+            <ul data-role="listview" data-inset="true">
+                <li><a href="#config">IR Remotes</a></li>
+	            <li><a href="Lights">Scotts Light</a></li>
+	            <li><a href="Other X10 Devices">Audio Controls</a></li>
+	            <li><a href="Set Profile">Audio Controls</a></li>
+	            <li><a href="#config">Setup/Config</a></li>
+            </ul>
+        </div><!-- /content -->
+    </div><!-- /page -->
+
+    <div data-role="page" id="config">
+        <div data-role="header">
+            <a href="/logout/" data-icon="delete">Logout</a>
+            <h1>Config - Home Automater</h1>
+        </div><!-- /header -->
+        <div data-role="content">	
+            <ul data-role="listview" data-inset="true">
+                <li><a href="#home">Home</a></li>
+                <li><a href="new/IR.html">New IR Remote</a></li>
+                <li><a href="new/x10.html">New X10 Device</a></li>
+                <li><a href="floorplans.html">Floor Plans</a></li>
+                <li><a href="profiles.html">Edit Profiles</a></li>
+            </ul>
+        </div><!-- /content -->
+    </div><!-- /page -->
+
+</body>
+</html>

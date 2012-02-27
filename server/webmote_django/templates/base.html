@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="en">
+<head>
+    {% if 1 %}
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes"> 
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.css" />
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+
+        $(document).ready(function() {
+            $("a").attr("rel","external");
+
+            $('.on_off_light').change(function() {
+                var el = $(this).children('select');
+                var deviceID = el.attr('id').split('-')[1];
+                var state = el.attr('value') == "on" ? 1:0;
+                $.ajax({
+                    url : '/setstate/' + deviceID + '/' + state,
+                });
+            });
+
+            $('.dimmable_light').change(function() {
+                var el = $(this).children('input');
+                var deviceID = el.attr('id').split('-')[1];
+                var state = el.attr('value');
+                $.ajax({
+                    url : '/setstate/' + deviceID + '/' + state,
+                });
+            });
+        });
+
+        function getSelectedProfile() {
+            return $('#selectProfile option:selected')[0].value;
+        }
+
+	    $(document).live("mobileinit", function(){
+	      $.mobile.ajaxFormsEnabled = false;
+	    });
+
+	    $(document).live("mobileinit", function(){
+	      $.mobile.ajaxLinksEnabled = false;
+	    });
+
+    </script>
+    <script type="text/javascript" src="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.js"></script>
+
+
+    <!--Dialog Boxes-->
+    <link rel="stylesheet" type="text/css" href="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog.min.css" />
+    <script type="text/javascript" src="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog.min.js"></script>
+    {% endif %}
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>{% block title %}{% endblock %}</title>
+    {% if error %}
+    <script>alert('{{ error }}');</script>
+    {% endif %}
+</head>
+<body id="{% block body_id %}{% endblock %}">
+  <div id="body">
+{% comment %}
+    <nav>
+        <a href="/">Home</a>
+        <a href="/ir">IR Remotes</a>
+        <a href="/lights">Lights</a>
+        <a href="/devices/">All Devices</a>
+        <a href="/setup/">Setup/Config</a>
+        <a href="/logout/" data-icon="delete">Logout</a>
+    </nav>
+{% endcomment %}
+
+    {% block body %}
+      <div>
+    <div data-role="header" data-position="inline">
+	    <a href="/" data-icon="home">Home</a>
+	    <h1>{% block page_title %}{% endblock %}</h1>
+	    <a href="/logout/" data-icon="delete">Logout</a>
+    </div>
+        {% block content_title %}{% endblock %}
+      </div>
+      <div class="content">
+        {% block content %}{% endblock %}
+      </div>
+    {% endblock %}
+  </div>
+</body>
+</html>

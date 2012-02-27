@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load url from future %}
+
+{% block title %}
+All Devices - Home Control
+{% endblock %}
+{% block page_title %}
+    All Devices
+{% endblock %}
+    <script type="text/javascript" charset="utf-8">
+        $('select').change(function() {
+            alert('wtf');
+        });
+    </script>
+
+{% block content %}
+    <div data-role="content">
+        {% if devices_onoff or devices_dimmable %}
+            {% if devices_onoff %}
+                <h1>Basic Lights</h1>
+                {% for device in devices_onoff %}
+                    {% if device.type == "On-Off Light" %}
+                        <div class="on_off_light" id="{{ device.id }}">
+                            {{ device.name }}
+                            <select name="slider" id="flip-{{ device.id }}" data-role="slider">
+                                {% if device.state == 0 %}
+                            	    <option value="off" selected="selected">Off</option>
+                            	    <option value="on">On</option>
+                                {% else %}
+                            	    <option value="off">Off</option>
+                            	    <option value="on" selected="selected">On</option>                                
+                                {% endif %}
+                            </select>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            {% if devices_dimmable %}
+                <br><h1>Dimmable Lights</h1>
+                {% for device in devices_dimmable %}
+                    {% if device.type == "Dimmable Light" %}
+                        <div class="dimmable_light" id="{{ device.id }}">
+                            {{ device.name }}<br>
+                            <input type="range" name="slider" id="slider-{{ device.id }}" value="{{ device.state }}" min="0" max="100" step="5" />
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            <div id="loadProfile">
+                <h1>Profiles</h1>
+                <h3>Select a Profile</h3>
+                <form name="loadDeleteProfile" method="POST">{% csrf_token %}
+                    <select id="selectProfile">
+                        <option value="nothing">---</option>
+                        <option value="All On">All On</option>
+                        <option value="All Off">All Off</option>
+                        {% for profile in profiles %}
+                            <option value="{{ profile }}">{{ profile }}</option>
+                        {% endfor %}
+                    </select>
+                    <input name="deleteProfile" type="submit" value="Delete Selected Profile" onclick="this.value=getSelectedProfile();this.form.post()">
+                    <input name="loadProfile" type="submit" value="Load Selected Profile" onclick="this.value=getSelectedProfile(); this.form.post()">
+                </form>
+            </div>
+            <div id="saveProfile">
+                <h3>Save Current State as New Profile</h3>
+                <form name="saveProfile" method="POST">{% csrf_token %}
+                    <input name="profileName" type="text" placeholder="ex. All Off, Evening, etc.">
+                    <input name="saveProfile" type="submit" value="Save Current State as New Profile">
+                </form>
+            </div>
+        {% else %}
+            <h3>There are currently no devices. To add a device go to <a href="/setup/">Setup</a><h3>
+        {% endif %}
+    </div>
+{% endblock %}

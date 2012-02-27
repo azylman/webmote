@@ -1,10 +1,23 @@
+{% extends "base.html" %}
+{% comment %}
 {% extends "jqm/simple.html" %}
-{% block title %}A Landing Page{% endblock %}
+{% endcomment %}
+
+{% block page_title %}
+    Webmote
+{% endblock %}
 {% block content %}
 {% if user.is_anonymous %}
-    <p>Obviously you love this site, why don't you log in and stay a while?</p>
+    <p>Go ahead and take control by logging in.</p>
     <a data-role="button" href="{% url login %}">Log In</a>
 {% else %}
-    <p>Contratulations on logging in, we love visitors, but we currently have nothing to show you!</p>
+    <div data-role="content">	
+        <ul data-role="listview" data-inset="true">
+            <li><a href="/ir/">IR Remotes</a></li>
+            <li><a href="/lights/">Lights</a></li>
+            <li><a href="/devices/">All Devices</a></li>
+            <li><a href="/setup/">Setup/Config</a></li>
+        </ul>
+    </div>
 {% endif %}
 {% endblock %}
