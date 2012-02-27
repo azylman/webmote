@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load url from future %}
+
+{% block title %}
+    IR - Webmote
+{% endblock %}
+{% block page_title %}
+    IR
+{% endblock %}
+{% block content %}
+    {% if command %}
+        {{ command }} was successfully sent to the transciever! <br>Check the transciever side to see if the message made it there!
+    {% else %}
+        Command failed to be sent
+    {% endif %}
+{% endblock %}

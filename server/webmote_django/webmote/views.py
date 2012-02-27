@@ -98,3 +98,32 @@ def device(request, num="1"):
     context['commands'] = Commands.objects.filter(modelNumber=context['device'])
     return render_to_response('device.html', context, context_instance=RequestContext(request))
 
+@login_required
+def ir(request):
+    context = {}
+    testMessage = "Testing 123 Testing 123"
+    if IRSend(testMessage):
+        context['command'] = "Testing 123 Testing 123"
+    return render_to_response('ir.html', context, context_instance=RequestContext(request))
+
+# This could be seperated from the views eventually because it really isn't related to generating a web page.
+def x10Send():
+    return "command not sent"
+
+def IRSend(command):
+    try:
+        import serial, sys, os
+        ser = serial.Serial('/dev/ttyUSB0', 9600) # this should pull the location of the xbee from the db
+        ser.write(command)
+        return 1
+    except:
+        determineIRPort()
+        return False
+
+
+# This should get called on setup or if there are communication problems. maybe set the value in the db?
+def determineIRPort():
+    return '/dev/ttyUSB0'
+
+
+
