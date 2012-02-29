@@ -40,6 +40,7 @@ urlpatterns = patterns('',
     url(r'^setup/$', 'webmote_django.webmote.views.setup'),
     url(r'^device/(?P<num>\d+)/$', 'webmote_django.webmote.views.device'),
     url(r'^logout/$', 'webmote_django.webmote.views.logout_view'),
+    url(r'^identification/$', 'webmote_django.webmote.views.identification'),
 
 
 
