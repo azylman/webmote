@@ -125,7 +125,7 @@ def x10Send():
 def IRSend(command):
     try:
         import serial, sys, os
-        ser = serial.Serial('/dev/ttyUSB0', 9600) # this should pull the location of the xbee from the db
+        ser = serial.Serial('/dev/ttyACM0', 9600) # this should pull the location of the xbee from the db
         ser.write(command)
         return 1
     except:
