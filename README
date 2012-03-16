@@ -22,8 +22,9 @@ Tasks:
 ******
 
 -Proof of concept 2-way xbee communication - Done
--Add IR LED and phototransistor to transciever 
--Build a simple web server to prove web control-to xbee link
+-Add IR LED and phototransistor to transciever - Done
+-Build a simple web server to prove web control-to xbee link - Done
+-Design document...
 
 ***************
 Modus Operandi:
