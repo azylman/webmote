@@ -33,7 +33,7 @@ urlpatterns = patterns('',
 
     # Pages
     url(r'^setstate/(?P<num>\d+)/(?P<state>\d+)/$', 'webmote_django.webmote.views.setState'),
-    url(r'^ir/$', 'webmote_django.webmote.views.ir'),
+    url(r'^ir/(?P<num>\d+)/$', 'webmote_django.webmote.views.ir'),
     url(r'^devices/$', 'webmote_django.webmote.views.devices'),
     url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
     url(r'^controller/$', 'webmote_django.webmote.views.index'),

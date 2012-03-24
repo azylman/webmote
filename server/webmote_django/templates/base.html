@@ -58,32 +58,33 @@
     <script>alert('{{ error }}');</script>
     {% endif %}
 </head>
-<body id="{% block body_id %}{% endblock %}">
-  <div id="body">
-{% comment %}
-    <nav>
-        <a href="/">Home</a>
-        <a href="/ir">IR Remotes</a>
-        <a href="/lights">Lights</a>
-        <a href="/devices/">All Devices</a>
-        <a href="/setup/">Setup/Config</a>
-        <a href="/logout/" data-icon="delete">Logout</a>
-    </nav>
-{% endcomment %}
 
-    {% block body %}
-      <div>
-    <div data-role="header" data-position="inline">
-	    <a href="/" data-icon="home">Home</a>
-	    <h1>{% block page_title %}{% endblock %}</h1>
-	    <a href="/logout/" data-icon="delete">Logout</a>
+<body id="{% block body_id %}{% endblock %}">
+    <div id="body">
+        {% comment %}
+        <nav>
+            <a href="/">Home</a>
+            <a href="/ir">IR Remotes</a>
+            <a href="/lights">Lights</a>
+            <a href="/devices/">All Devices</a>
+            <a href="/setup/">Setup/Config</a>
+            <a href="/logout/" data-icon="delete">Logout</a>
+        </nav>
+        {% endcomment %}
+
+        {% block body %}
+        <div>
+            <div data-role="header" data-position="inline">
+        	    <a href="/" data-icon="home">Home</a>
+        	    <h1>{% block page_title %}{% endblock %}</h1>
+        	    <a href="/logout/" data-icon="delete">Logout</a>
+            </div>
+            {% block content_title %}{% endblock %}
+        </div>
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+        {% endblock %}
     </div>
-        {% block content_title %}{% endblock %}
-      </div>
-      <div class="content">
-        {% block content %}{% endblock %}
-      </div>
-    {% endblock %}
-  </div>
 </body>
 </html>

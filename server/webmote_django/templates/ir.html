@@ -8,9 +8,25 @@
     IR
 {% endblock %}
 {% block content %}
+
+
+Status:<br>
     {% if command %}
         {{ command }} was successfully sent to the transciever! <br>Check the transciever side to see if the message made it there!
     {% else %}
-        Command failed to be sent
+        Nothing sent
     {% endif %}
 {% endblock %}
+
+<!--
+<p style="text-align:center;">
+    <a href="/ir/1/" ><img src="http://www.semesterinthewest.org/images/play_button.gif" width="120" height="120"  style="border: 0px;"  alt="Link Description" /></a><br>
+
+<a href="/ir/2/"><img src="https://encrypted-tbn1.google.com/images?q=tbn:ANd9GcRkIoXO_U8eDlXRZoPx_YGCRSyr_c-zCIAL9vCxsXhH0RoYWaH5RQ" width="120" height="120"  style="border: 0px;"  alt="Link Description" /></a>
+<a href="/ir/3/"><img src="https://encrypted-tbn1.google.com/images?q=tbn:ANd9GcQkfFdasmKWm8vAbj0weIE6pjzLZWaL6Tw24FE6SPni3N98wTLzWA" width="120" height="120"  style="border: 0px;"  alt="Link Description" /></a>
+</p>
+
+ https://encrypted-tbn1.google.com/images?q=tbn:ANd9GcQkfFdasmKWm8vAbj0weIE6pjzLZWaL6Tw24FE6SPni3N98wTLzWA
+https://encrypted-tbn1.google.com/images?q=tbn:ANd9GcRkIoXO_U8eDlXRZoPx_YGCRSyr_c-zCIAL9vCxsXhH0RoYWaH5RQ
+-->
+

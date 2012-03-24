@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.views import logout_then_login
 from django.contrib.auth.decorators import login_required
 from webmote_django.webmote.models import *
-
+import serial, sys, os
 
 def identification(request):
     if request.method == 'GET':
@@ -31,17 +31,19 @@ def logout_view(request):
 
 @login_required
 def setState(request, num="1", state="0"):
+    # Dispatch command to appropriate device
     device = Devices.objects.filter(id=int(num))[0]
     device.state = int(state)
     device.save()
-    # Dispatch command to appropriate device
     return render_to_response('index.html')
 
 @login_required
 def devices(request):
     context = {}
-    context['devices_onoff'] = Devices.objects.filter(type='On-Off Light')
-    context['devices_dimmable'] = Devices.objects.filter(type='Dimmable Light')
+    for deviceType in DEVICE_TYPES:
+        context[deviceType[0]] = Devices.objects.filter(type = deviceType[0])
+#    context['devices_onoff'] = Devices.objects.filter(type = 'On-Off Light')
+#    context['devices_dimmable'] = Devices.objects.filter(type = 'Dimmable Light')
     if request.method == 'POST':
         if 'saveProfile' in request.POST:
             Profiles.objects.filter(profileName=request.POST['profileName']).delete()
@@ -78,7 +80,8 @@ def setup(request):
             if form.is_valid():
                 form.save()
             else:
-                context['error'] = str('House must be a character, Unit must be a number, and all other fields must be filled in.')
+                context['error'] = str('House must be a character, Unit must be a number, \
+                                        and all other fields must be filled in.')
         elif 'deleteDevice' in request.POST:
             Devices.objects.filter(id=request.POST['deleteDevice']).delete()
     return render_to_response('setup.html', context, context_instance=RequestContext(request))
@@ -93,16 +96,20 @@ def device(request, num="1"):
             if form.is_valid():
                 form.save()
             else:
-                context['error'] = str('House must be a character, Unit must be a number, and all other fields must be filled in.')
+                context['error'] = str('House must be a character, Unit must be a number, \
+                                        and all other fields must be filled in.')
         elif 'addCommand' in request.POST:
             # Seems like there should be a cleaner way of doing this...
             form = PartialCommandForm(request.POST)
-            command = Commands(modelNumber=context['device'], name=request.POST['name'], value=request.POST['value'])
+            command = Commands(modelNumber=context['device'], \
+                               name=request.POST['name'], \
+                               value=request.POST['value'])
             if form.is_valid():
                 command.save()
     #            form.save()
             else:
-                context['error'] = str('Name should be a short name for the command, Value is the integer representation of the x10 command')
+                context['error'] = str('Name should be a short name for the command, \
+                                        Value is the integer representation of the x10 command')
         elif 'deleteCommand' in request.POST:
             Commands.objects.filter(id=request.POST['deleteCommand']).delete()
     context['device_form'] = DeviceForm(instance=context['device'])
@@ -110,13 +117,36 @@ def device(request, num="1"):
     context['commands'] = Commands.objects.filter(modelNumber=context['device'])
     return render_to_response('device.html', context, context_instance=RequestContext(request))
 
+#@login_required
+#def ir(request, num="0"):
+#    context = {}
+#    if IRSend(num):
+#        context['command'] = num
+#        print num + " was sent"
+#    return render_to_response('ir.html', context, context_instance=RequestContext(request))
+
 @login_required
-def ir(request):
+def rooms(request):
     context = {}
-    testMessage = "Testing 123 Testing 123"
-    if IRSend(testMessage):
-        context['command'] = "Testing 123 Testing 123"
-    return render_to_response('ir.html', context, context_instance=RequestContext(request))
+    context['rooms'] = Rooms.objects.all()
+    return render_to_response('rooms.html', context, context_instance=RequestContext(request))
+
+@login_required
+def room(request, num = "0"):
+    context = {}
+    context['ir_devices'] = IR_Devices.objects.filter(room = int(num))
+    return render_to_response('room.html', context, context_instance=RequestContext(request))
+
+@login_required
+def custom_screen(request, screen_name = "default"):
+    context = {}
+    context['commands'] = Commands.objects.filter(id = Custom_Screens.objects.filter(name = screen_name))
+    return render_to_response('custom_screen.html', context, context_instance=RequestContext(request))
+
+
+
+
+
 
 # This could be seperated from the views eventually because it really isn't related to generating a web page.
 def x10Send():
@@ -124,8 +154,8 @@ def x10Send():
 
 def IRSend(command):
     try:
-        import serial, sys, os
-        ser = serial.Serial('/dev/ttyACM0', 9600) # this should pull the location of the xbee from the db
+        # this should pull the location of the xbee from the db
+        ser = serial.Serial('/dev/ttyACM0', 9600)
         ser.write(command)
         return 1
     except:

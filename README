@@ -54,3 +54,7 @@ Recording a Command:
 -After recording the signal the tranceiver sends a signal back to the server where it is saved.
 
 
+***************
+Long Term Ideas:
+***************
+Setup modular plugin system such that people can add new systems (x10, zigbee type systems)
