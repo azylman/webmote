@@ -16,6 +16,9 @@ X10_TYPES = (
 ################
 # Webmote Device
 ################
+# https://docs.djangoproject.com/en/dev/topics/db/models/#differences-between-proxy-inheritance-and-unmanaged-models --need to read up on this
+
+
 class Devices(models.Model):
     location = models.CharField(max_length=100)
     name = models.CharField(max_length=100)

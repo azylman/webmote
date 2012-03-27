@@ -72,11 +72,11 @@ def devices(request):
 @login_required
 def setup(request):
     context = {}
-    context['form'] = DeviceForm()
+    context['form'] = X10_Form()
     context['devices'] = Devices.objects.all()
     if request.method == 'POST':
         if 'newDevice' in request.POST:
-            form = DeviceForm(request.POST, request.FILES)
+            form = X10_Form(request.POST, request.FILES)
             if form.is_valid():
                 form.save()
             else:
@@ -85,6 +85,33 @@ def setup(request):
         elif 'deleteDevice' in request.POST:
             Devices.objects.filter(id=request.POST['deleteDevice']).delete()
     return render_to_response('setup.html', context, context_instance=RequestContext(request))
+
+
+#@login_required
+#def setup(request):
+#    context = {}
+#    context['devices'] = Devices.objects.all()
+#    # This should create a form for each type of device (x10, IR, etc.)
+#    for device_form in device_forms():
+#        context[device_form] = device_form() 
+#    if request.method == 'POST':
+#        if 'newDevice' in request.POST:
+#            # Figure Out what kind of form here....
+#            form = X10_Form(request.POST, request.FILES)
+#            if form.is_valid():
+#                form.save()
+#            else:
+#                # Print out an the error given the form type
+#                context['error'] = str('House must be a character, Unit must be a number, \
+#                                        and all other fields must be filled in.')
+#        elif 'deleteDevice' in request.POST:
+#            Devices.objects.filter(id=request.POST['deleteDevice']).delete()
+#    return render_to_response('setup.html', context, context_instance=RequestContext(request))
+
+
+
+
+
 
 @login_required
 def device(request, num="1"):
@@ -146,7 +173,9 @@ def custom_screen(request, screen_name = "default"):
 
 
 
-
+################
+# X10
+################
 
 # This could be seperated from the views eventually because it really isn't related to generating a web page.
 def x10Send():

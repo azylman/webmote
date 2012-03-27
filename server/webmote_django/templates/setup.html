@@ -13,7 +13,8 @@ Devices - Home Control
         <div id="devices">
             <h2>Devices</h2>
             {% if devices %}
-            {% if 0 %}
+            {% if 0 %} 
+<!--            This might be a better format for nonmobile usage??-->
             <table id="devices_table" border="1">
                 <tr>
                     {% with devices|first as first_dev %}
@@ -75,13 +76,23 @@ Devices - Home Control
             {% endif %}
         </div>
 
+        {% if deviceTypes %}
         <div id="newDevice">
             <h2>New Device</h2>
+            <select id="selectDeviceType">
+                {% for deviceType in deviceTypes %}
+                    <option id="{{ deviceType }}">{{ deviceType }}</option>
+                {% endfor %}
+            </select>
             <form method="post" action="">{% csrf_token %}
                 {{ form.as_table }}
                 <input type="submit" name="newDevice" value="Add Device" />
             </form>
         </div>
-
+        {% else %}
+        <div id="noDeviceTypes">
+               <h3>Currently there are no <a href="/addDeviceType/">device types registered.</a></h3>
+        </div>
+        {% endif %}
     </div>
 {% endblock %}
