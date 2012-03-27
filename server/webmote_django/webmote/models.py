@@ -23,11 +23,11 @@ class Devices(models.Model):
 ################
 # X10
 ################
-class X10_Devices(models.webmote.Devices):
+class X10_Devices(Devices):
     house = models.CharField(max_length=1)
     unit = models.IntegerField()
     type = models.CharField(max_length=100, choices=DEVICE_TYPES)
-    modelNumber = models.
+    modelNumber = models.CharField(max_length=100, choices=DEVICE_TYPES)
     state = models.IntegerField(default=0)
     def get_fields(self):
         return [(field.name.capitalize(), field.value_to_string(self)) for field in Devices._meta.fields]            
@@ -52,11 +52,11 @@ class X10_Commands(models.Model):
 
 class X10_CommandForm(ModelForm):
     class Meta:
-        model = Commands
+        model = X10_Commands
 
 class X10_PartialCommandForm(ModelForm):
     class Meta:
-		model = Commands
+		model = X10_Commands
 		fields = ('name','value')
 
 class X10_Profiles(models.Model):
@@ -67,8 +67,9 @@ class X10_Profiles(models.Model):
 ################
 # IR
 ################
-class IR_Devices(models.webmote.Devices):
-    model = models.IR_Device_Database()
+class IR_Devices(Devices):
+    model = models.CharField(max_length=100)
+    #model = models.IR_Device_Database()
 
 
 
