@@ -151,13 +151,13 @@ def device(request, num="1"):
     context['commands'] = Commands.objects.filter(modelNumber=context['device'])
     return render_to_response('device.html', context, context_instance=RequestContext(request))
 
-#@login_required
-#def ir(request, num="0"):
-#    context = {}
-#    if IRSend(num):
-#        context['command'] = num
-#        print num + " was sent"
-#    return render_to_response('ir.html', context, context_instance=RequestContext(request))
+@login_required
+def ir(request, num="0"):
+    context = {}
+    if IRSend(num):
+        context['command'] = num
+        print num + " was sent"
+    return render_to_response('ir.html', context, context_instance=RequestContext(request))
 
 @login_required
 def rooms(request):
