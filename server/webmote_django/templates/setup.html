@@ -76,6 +76,13 @@ Devices - Home Control
             {% endif %}
         </div>
 
+        <div id="newDeviceType">
+            <h2>New Device Type</h2>
+            need to figure this out at some point...
+            I am thinking we define a plugin format (lists the classes, methods, forms, url) in such a way that it is easy to parse.  Then we just add those to the appropraite files with a script with some comment anchors allowing for removal, replacement, etc.      
+        </div>
+
+
         {% if deviceTypes %}
         <div id="newDevice">
             <h2>New Device</h2>
@@ -91,7 +98,7 @@ Devices - Home Control
         </div>
         {% else %}
         <div id="noDeviceTypes">
-               <h3>Currently there are no <a href="/addDeviceType/">device types registered.</a></h3>
+               <h3>Currently there are no device types registered. Add a new device type and then add a new device</a></h3>
         </div>
         {% endif %}
     </div>

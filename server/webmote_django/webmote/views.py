@@ -1,3 +1,4 @@
+from pprint import pprint
 from django import forms
 from django.template import RequestContext
 from django.http import HttpResponse
@@ -69,44 +70,46 @@ def devices(request):
     context['profiles'] = unique
     return render_to_response('devices.html', context, context_instance=RequestContext(request))
 
-@login_required
-def setup(request):
-    context = {}
-    context['form'] = X10_Form()
-    context['devices'] = Devices.objects.all()
-    if request.method == 'POST':
-        if 'newDevice' in request.POST:
-            form = X10_Form(request.POST, request.FILES)
-            if form.is_valid():
-                form.save()
-            else:
-                context['error'] = str('House must be a character, Unit must be a number, \
-                                        and all other fields must be filled in.')
-        elif 'deleteDevice' in request.POST:
-            Devices.objects.filter(id=request.POST['deleteDevice']).delete()
-    return render_to_response('setup.html', context, context_instance=RequestContext(request))
-
-
 #@login_required
 #def setup(request):
 #    context = {}
+#    context['form'] = X10_Form()
 #    context['devices'] = Devices.objects.all()
-#    # This should create a form for each type of device (x10, IR, etc.)
-#    for device_form in device_forms():
-#        context[device_form] = device_form() 
 #    if request.method == 'POST':
 #        if 'newDevice' in request.POST:
-#            # Figure Out what kind of form here....
 #            form = X10_Form(request.POST, request.FILES)
 #            if form.is_valid():
 #                form.save()
 #            else:
-#                # Print out an the error given the form type
 #                context['error'] = str('House must be a character, Unit must be a number, \
 #                                        and all other fields must be filled in.')
 #        elif 'deleteDevice' in request.POST:
 #            Devices.objects.filter(id=request.POST['deleteDevice']).delete()
 #    return render_to_response('setup.html', context, context_instance=RequestContext(request))
+
+
+@login_required
+def setup(request):
+    context = {}
+    context['devices'] = Devices.objects.all()
+    # This should eventually create a form for each type of device (x10, IR, etc.)
+    context['deviceTypes'] = []
+    for deviceType in Devices.__subclasses__():
+        context['deviceTypes'].append(deviceType.__name__.replace('_Devices', ''))
+
+    if request.method == 'POST':
+        if 'newDevice' in request.POST:
+            # Figure Out what kind of form here....
+            form = X10_Form(request.POST, request.FILES)
+            if form.is_valid():
+                form.save()
+            else:
+                # Print out an the error given the form type
+                context['error'] = str('House must be a character, Unit must be a number, \
+                                        and all other fields must be filled in.')
+        elif 'deleteDevice' in request.POST:
+            Devices.objects.filter(id=request.POST['deleteDevice']).delete()
+    return render_to_response('setup.html', context, context_instance=RequestContext(request))
 
 
 
