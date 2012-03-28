@@ -1,5 +1,6 @@
 from pprint import pprint
 from django import forms
+from django.forms.models import modelformset_factory
 from django.template import RequestContext
 from django.http import HttpResponse
 from django.forms.models import modelformset_factory
@@ -92,21 +93,24 @@ def devices(request):
 def setup(request):
     context = {}
     context['devices'] = Devices.objects.all()
-    # This should eventually create a form for each type of device (x10, IR, etc.)
     context['deviceTypes'] = []
+    context['addDeviceForms'] = []
     for deviceType in Devices.__subclasses__():
-        context['deviceTypes'].append(deviceType.__name__.replace('_Devices', ''))
-
+        typeName = deviceType.__name__.replace('_Devices', '')
+        context['deviceTypes'].append(typeName)
+        context['addDeviceForms'].append([modelformset_factory(deviceType), typeName])
     if request.method == 'POST':
         if 'newDevice' in request.POST:
-            # Figure Out what kind of form here....
-            form = X10_Form(request.POST, request.FILES)
-            if form.is_valid():
-                form.save()
-            else:
-                # Print out an the error given the form type
-                context['error'] = str('House must be a character, Unit must be a number, \
-                                        and all other fields must be filled in.')
+            for deviceType in Devices.__subclasses__():
+                form = modelformset_factory(deviceType)
+                try:
+                    formset = form(request.POST, request.FILES)
+                    if formset.is_valid():
+                        formset.save()
+                        print "success"
+                        break
+                except:
+                    print "wtf"
         elif 'deleteDevice' in request.POST:
             Devices.objects.filter(id=request.POST['deleteDevice']).delete()
     return render_to_response('setup.html', context, context_instance=RequestContext(request))

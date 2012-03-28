@@ -7,12 +7,6 @@ DEVICE_TYPES = (
     ('Zigbee Device', 'Zigbee Device'),
 )
 
-X10_TYPES = (
-    ('On-Off Light', 'On-Off Light'),
-    ('Dimmable Light', 'Dimmable Light'),
-)
-
-
 ################
 # Webmote Device
 ################
@@ -20,17 +14,35 @@ X10_TYPES = (
 
 
 class Devices(models.Model):
-    location = models.CharField(max_length=100)
     name = models.CharField(max_length=100)
+    location = models.CharField(max_length=100)
+
+
+# need to make the location a drop down of existing locations with an option to create a new one
+class DeviceForm(ModelForm):
+    class Meta:
+        model = Devices
 
 ################
 # X10
 ################
+
+X10_DEVICE_TYPES = (
+    ('On-Off Light', 'On-Off Light'),
+    ('Dimmable Light', 'Dimmable Light'),
+)
+
+X10_KNOWN_MODELS = (
+    ('Socket Rocket', 'abc123'),
+    ('Socket Rocket Dimmer', '123abc'),
+)
+
+
 class X10_Devices(Devices):
     house = models.CharField(max_length=1)
     unit = models.IntegerField()
-    type = models.CharField(max_length=100, choices=DEVICE_TYPES)
-    modelNumber = models.CharField(max_length=100, choices=DEVICE_TYPES)
+    type = models.CharField(max_length=100, choices=X10_DEVICE_TYPES)
+    modelNumber = models.CharField(max_length=100, choices=X10_KNOWN_MODELS)
     state = models.IntegerField(default=0)
     def get_fields(self):
         return [(field.name.capitalize(), field.value_to_string(self)) for field in Devices._meta.fields]            
@@ -40,7 +52,7 @@ class X10_Devices(Devices):
 
 class X10_Form(ModelForm):
     class Meta:
-        model = Devices
+        model = X10_Devices
         exclude = ('state',)
 
 class X10_Commands(models.Model):

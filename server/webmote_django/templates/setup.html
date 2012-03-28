@@ -76,30 +76,38 @@ Devices - Home Control
             {% endif %}
         </div>
 
+
+
         <div id="newDeviceType">
             <h2>New Device Type</h2>
-            need to figure this out at some point...
-            I am thinking we define a plugin format (lists the classes, methods, forms, url) in such a way that it is easy to parse.  Then we just add those to the appropraite files with a script with some comment anchors allowing for removal, replacement, etc.      
-        </div>
+            <h3>(e.g. Zigbee, IR, X10)</h3>
 
+            need to figure this out at some point...I am thinking we define a plugin format (lists the classes, methods, forms, url) in such a way that it is easy to parse.  Then we just add those to the appropraite files with a script with some comment anchors allowing for removal, replacement, etc.      
+        </div>
 
         {% if deviceTypes %}
-        <div id="newDevice">
-            <h2>New Device</h2>
-            <select id="selectDeviceType">
-                {% for deviceType in deviceTypes %}
-                    <option id="{{ deviceType }}">{{ deviceType }}</option>
-                {% endfor %}
-            </select>
-            <form method="post" action="">{% csrf_token %}
-                {{ form.as_table }}
-                <input type="submit" name="newDevice" value="Add Device" />
-            </form>
-        </div>
+            <div id="newDevice">
+                <h2>New Device</h2>
+                Device type:
+                <select id="selectDeviceType">
+                        <option>---</option>
+                    {% for deviceType in deviceTypes %}
+                        <option id="{{ deviceType }}">{{ deviceType }}</option>
+                    {% endfor %}
+                </select>
+                <form method="post" action="">{% csrf_token %}
+                    {% for deviceForm in addDeviceForms %}
+                        <div class="deviceForm" id="{{ deviceForm.1 }}" style="display:none">
+                            {{ deviceForm.0.as_table }}
+                        </div>
+                    {% endfor %}
+                    <input type="submit" name="newDevice" value="Add Device" />
+                </form>
+            </div>
         {% else %}
-        <div id="noDeviceTypes">
-               <h3>Currently there are no device types registered. Add a new device type and then add a new device</a></h3>
-        </div>
+            <div id="noDeviceTypes">
+                   <h3>Currently there are no device types registered. Add a new device type and then add a new device</a></h3>
+            </div>
         {% endif %}
     </div>
 {% endblock %}
