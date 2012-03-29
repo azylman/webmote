@@ -95,14 +95,14 @@ Devices - Home Control
                         <option id="{{ deviceType }}">{{ deviceType }}</option>
                     {% endfor %}
                 </select>
-                <form method="post" action="">{% csrf_token %}
-                    {% for deviceForm in addDeviceForms %}
-                        <div class="deviceForm" id="{{ deviceForm.1 }}" style="display:none">
+                {% for deviceForm in addDeviceForms %}
+                    <div class="deviceForm" id="{{ deviceForm.1 }}" style="display:none">
+                        <form method="post" action="">{% csrf_token %}
                             {{ deviceForm.0.as_table }}
-                        </div>
-                    {% endfor %}
-                    <input type="submit" name="newDevice" value="Add Device" />
-                </form>
+                            <input type="submit" name="new_{{ deviceForm.1 }}"" value="Add Device" />
+                        </form>
+                    </div>
+                {% endfor %}
             </div>
         {% else %}
             <div id="noDeviceTypes">

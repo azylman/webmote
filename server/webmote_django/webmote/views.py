@@ -95,24 +95,25 @@ def setup(request):
     context['devices'] = Devices.objects.all()
     context['deviceTypes'] = []
     context['addDeviceForms'] = []
+    pprint(Devices.__subclasses__())
     for deviceType in Devices.__subclasses__():
         typeName = deviceType.__name__.replace('_Devices', '')
         context['deviceTypes'].append(typeName)
-        context['addDeviceForms'].append([modelformset_factory(deviceType), typeName])
-    if request.method == 'POST':
-        if 'newDevice' in request.POST:
-            for deviceType in Devices.__subclasses__():
+        formset = modelformset_factory(deviceType)
+        form = formset(queryset=deviceType.objects.none())
+        context['addDeviceForms'].append([form, typeName])
+        if request.method == 'POST':
+            if 'new_' + typeName in request.POST:
+                print typeName
                 form = modelformset_factory(deviceType)
-                try:
-                    formset = form(request.POST, request.FILES)
-                    if formset.is_valid():
-                        formset.save()
-                        print "success"
-                        break
-                except:
-                    print "wtf"
-        elif 'deleteDevice' in request.POST:
-            Devices.objects.filter(id=request.POST['deleteDevice']).delete()
+                formset = form(request.POST)
+                if formset.is_valid():
+                    formset.save()
+                    print "form was saved successfully"
+                else:
+                    print "form was invalid"
+            elif 'deleteDevice' in request.POST:
+                Devices.objects.filter(id=request.POST['deleteDevice']).delete()
     return render_to_response('setup.html', context, context_instance=RequestContext(request))
 
 
