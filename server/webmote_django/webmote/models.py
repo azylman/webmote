@@ -1,5 +1,6 @@
 from django.db import models
 from django.forms import ModelForm
+from django import forms
 
 DEVICE_TYPES = (
     ('X10 Device', 'X10 Device'),
@@ -10,18 +11,23 @@ DEVICE_TYPES = (
 ################
 # Webmote Device
 ################
-# https://docs.djangoproject.com/en/dev/topics/db/models/#differences-between-proxy-inheritance-and-unmanaged-models --need to read up on this
-
-
 class Devices(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     location = models.CharField(max_length=100)
-
 
 # need to make the location a drop down of existing locations with an option to create a new one
 class DeviceForm(ModelForm):
     class Meta:
         model = Devices
+
+#################
+# Webmote Command
+#################
+
+
+
+
+
 
 ################
 # X10
@@ -32,11 +38,13 @@ X10_DEVICE_TYPES = (
     ('Dimmable Light', 'Dimmable Light'),
 )
 
+# Will probably put some popular modesl in
 X10_KNOWN_MODELS = (
     ('Socket Rocket', 'abc123'),
     ('Socket Rocket Dimmer', '123abc'),
 )
 
+#, widget = forms.TextInput(attrs={'placeholder': 'Any character A through P'})
 
 class X10_Devices(Devices):
     house = models.CharField(max_length=1)
