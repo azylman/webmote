@@ -12,7 +12,7 @@
     <div data-role="content">
         <div id="device">
             <form method="post" action="">{% csrf_token %}
-                {{ device_form.as_table }}
+                {{ deviceForm.as_table }}
                 <input type="submit" name="updateDevice" value="Update Device Info" />
             </form>
         </div>
@@ -80,11 +80,18 @@
         </div>
         <div id="addCommand">
             <h2>Add Custom Command</h2>
-            <h4>Common commands (On, Off, etc.) are already programmed!</h4>
             <form method="post" action="">{% csrf_token %}
-                {{ command_form.as_table }}
+                {{ commandForm.as_table }}
                 <input type="submit" name="addCommand" value="Add Command" />
             </form>
         </div>
     </div>
+<!--                {% for commandForm in addDeviceForms %}-->
+<!--                    <div class="commandForm" id="{{ commandForm.1 }}" style="display:none">-->
+<!--                        <form method="post" action="">{% csrf_token %}-->
+<!--                            {{ commandForm.0.as_table }}-->
+<!--                            <input type="submit" name="new_{{ commandForm.1 }}"" value="Add Command" />-->
+<!--                        </form>-->
+<!--                    </div>-->
+<!--                {% endfor %}-->
 {% endblock %}

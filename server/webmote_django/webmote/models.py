@@ -2,12 +2,6 @@ from django.db import models
 from django.forms import ModelForm
 from django import forms
 
-DEVICE_TYPES = (
-    ('X10 Device', 'X10 Device'),
-    ('IR Device', 'IR Device'),
-    ('Zigbee Device', 'Zigbee Device'),
-)
-
 ################
 # Webmote Device
 ################
@@ -15,27 +9,38 @@ class Devices(models.Model):
     name = models.CharField(max_length=100, unique=True)
     location = models.CharField(max_length=100)
 
-    def getSubclass(self):
+    def getSubclassInstance(self):
         for deviceType in Devices.__subclasses__():
             device = deviceType.objects.filter(name=self.name)
-            if len(device) == 1:
+            if len(device):
                 return device[0]
         return False
-        
-# need to make the location a drop down of existing locations with an option to create a new one
-class DeviceForm(ModelForm):
-    class Meta:
-        model = Devices
 
+    def getEmptyCommandsForm(self):
+        for commandsFormType in CommandsForm.__subclasses__():
+            typeName = commandsFormType.__name__.replace('_CommandsForm', '')
+            if typeName in type(self.getSubclassInstance()).__name__.replace('_Devices', ''):
+                return commandsFormType
+        return False
+        
 #################
 # Webmote Command
 #################
+class Commands(models.Model):
+    name = models.CharField(max_length=100)
+    device = models.ForeignKey(Devices)
 
+    def getSubclassInstance(self):
+        for commandType in Commands.__subclasses__():
+            command = commandType.objects.filter(name=self.name, device=self.device)
+            if len(command):
+                return command[0]
+        return False
 
-
-
-
-
+class CommandsForm(ModelForm):
+    class Meta:
+        model = Commands
+    
 ################
 # X10
 ################
@@ -45,13 +50,11 @@ X10_DEVICE_TYPES = (
     ('Dimmable Light', 'Dimmable Light'),
 )
 
-# Will probably put some popular modesl in
+# Will probably put some popular models in
 X10_KNOWN_MODELS = (
     ('Socket Rocket', 'abc123'),
     ('Socket Rocket Dimmer', '123abc'),
 )
-
-#, widget = forms.TextInput(attrs={'placeholder': 'Any character A through P'})
 
 class X10_Devices(Devices):
     house = models.CharField(max_length=1)
@@ -59,35 +62,15 @@ class X10_Devices(Devices):
     type = models.CharField(max_length=100, choices=X10_DEVICE_TYPES)
     modelNumber = models.CharField(max_length=100, choices=X10_KNOWN_MODELS)
     state = models.IntegerField(default=0)
-    def get_fields(self):
-        return [(field.name.capitalize(), field.value_to_string(self)) for field in Devices._meta.fields]            
 
-    def __unicode__(self):
-        return self.house + str(self.unit) + '\n' + self.name + '\n' + self.modelNumber
+class X10_Commands(Commands):
+   # modelNumber = models.ForeignKey(X10_Devices)
+    code = models.IntegerField()
 
-class X10_Form(ModelForm):
-    class Meta:
-        model = X10_Devices
-        exclude = ('state',)
-
-class X10_Commands(models.Model):
-    modelNumber = models.ForeignKey(Devices)
-    name = models.CharField(max_length=100)
-    value = models.IntegerField()
-    def get_fields(self):
-        return [(field.name.capitalize(), field.value_to_string(self)) for field in Commands._meta.fields] 
-
-    def __unicode__(self):
-        return str(self.command)
-
-class X10_CommandForm(ModelForm):
+class X10_CommandsForm(CommandsForm):
     class Meta:
         model = X10_Commands
-
-class X10_PartialCommandForm(ModelForm):
-    class Meta:
-		model = X10_Commands
-		fields = ('name','value')
+        exclude = ('state', 'device')
 
 class X10_Profiles(models.Model):
     profileName = models.CharField(max_length=100)
@@ -98,10 +81,17 @@ class X10_Profiles(models.Model):
 # IR
 ################
 class IR_Devices(Devices):
-    model = models.CharField(max_length=100)
+    modelNumber = models.CharField(max_length=100)
 
+class IR_Commands(Commands):
+    code = models.IntegerField()
 
+class IR_CommandsForm(CommandsForm):
+    class Meta:
+        model = IR_Commands
+        exclude = ('device',)
 
 ################
 # IR Database (Alex Z)
 ################
+    

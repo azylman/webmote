@@ -74,7 +74,6 @@ def devices(request):
 @login_required
 def setup(request):
     context = {}
-    context['devices'] = Devices.objects.all()
     context['deviceTypes'] = []
     context['addDeviceForms'] = []
     for deviceType in Devices.__subclasses__():
@@ -91,83 +90,60 @@ def setup(request):
                     formset.save()
             elif 'deleteDevice' in request.POST:
                 Devices.objects.filter(id=request.POST['deleteDevice']).delete()
+    context['devices'] = Devices.objects.all()
     return render_to_response('setup.html', context, context_instance=RequestContext(request))
 
 
 @login_required
 def device(request, num="1"):
     context = {}
-    context['device'] = Devices.objects.filter(id=int(num))[0].getSubclass()
-    for deviceType in Devices.__subclasses__():
-        formset = modelformset_factory(deviceType, max_num=0)
-        context['device_form'] = formset(queryset=deviceType.objects.filter(name=context['device'].name))
-#    if request.method == 'POST':
-#        if 'updateDevice' in request.POST:
-#            form = DeviceForm(request.POST, instance=context['device'])
-#            if form.is_valid():
-#                form.save()
-#            else:
-#                context['error'] = str('House must be a character, Unit must be a number, \
-#                                        and all other fields must be filled in.')
-#        elif 'addCommand' in request.POST:
-#            # Seems like there should be a cleaner way of doing this...
+
+    # Produce an update form for the device
+    device = Devices.objects.filter(id=int(num))[0]
+    context['device'] = device.getSubclassInstance()
+    deviceType = type(context['device'])
+    formset = modelformset_factory(deviceType, max_num=0)
+    context['deviceForm'] = formset(queryset=deviceType.objects.filter(name=context['device'].name))
+
+    # Generate a new command form for the device
+    context['commandForm'] = device.getEmptyCommandsForm()
+
+    # Get all existing commands
+    context['commands'] = device.commands_set.all()
+
+    # Handle form submission
+    if request.method == 'POST':
+        if 'updateDevice' in request.POST:
+            print "update device is not finished"
+            form = modelformset_factory(deviceType)
+            updateFormset = form(request.POST)
+            if updateFormset.is_valid():
+                updateFormset.save()
+            # Need to refresh the object here...or put this at the top
+        elif 'addCommand' in request.POST:
+            print "addcommand does not work yet"
+            command = formset(request.POST, request.FILES)
+            pprint(command)
+            if command.is_valid():
+                command.save()
+                print "added command"
+
+
+
 #            form = PartialCommandForm(request.POST)
 #            command = Commands(modelNumber=context['device'], \
 #                               name=request.POST['name'], \
 #                               value=request.POST['value'])
 #            if form.is_valid():
 #                command.save()
-#    #            form.save()
-#            else:
-#                context['error'] = str('Name should be a short name for the command, \
-#                                        Value is the integer representation of the x10 command')
-#        elif 'deleteCommand' in request.POST:
-#            Commands.objects.filter(id=request.POST['deleteCommand']).delete()
-#    context['device_form'] = DeviceForm(instance=context['device'])
-
-#    context['device_form'] = 
-    #context['command_form'] = PartialCommandForm()
-    #context['commands'] = Commands.objects.filter(modelNumber=context['device'])
+#                form.save()
+        elif 'deleteCommand' in request.POST:
+            Commands.objects.filter(id=request.POST['deleteCommand']).delete()
     return render_to_response('device.html', context, context_instance=RequestContext(request))
 
 
 
-#@login_required
-#def device(request, num="1"):
-#    context = {}
-#    context['device'] = Devices.objects.filter(id=int(num))[0]
-#    if request.method == 'POST':
-#        if 'updateDevice' in request.POST:
-#            form = DeviceForm(request.POST, instance=context['device'])
-#            if form.is_valid():
-#                form.save()
-#            else:
-#                context['error'] = str('House must be a character, Unit must be a number, \
-#                                        and all other fields must be filled in.')
-#        elif 'addCommand' in request.POST:
-#            # Seems like there should be a cleaner way of doing this...
-#            form = PartialCommandForm(request.POST)
-#            command = Commands(modelNumber=context['device'], \
-#                               name=request.POST['name'], \
-#                               value=request.POST['value'])
-#            if form.is_valid():
-#                command.save()
-#    #            form.save()
-#            else:
-#                context['error'] = str('Name should be a short name for the command, \
-#                                        Value is the integer representation of the x10 command')
-#        elif 'deleteCommand' in request.POST:
-#            Commands.objects.filter(id=request.POST['deleteCommand']).delete()
-#    context['device_form'] = DeviceForm(instance=context['device'])
-#    context['command_form'] = PartialCommandForm()
-#    context['commands'] = Commands.objects.filter(modelNumber=context['device'])
-#    return render_to_response('X10_device.html', context, context_instance=RequestContext(request))
-
-
-
-
-
-
+# These are all basically pseudocode or stubs... all should be changed
 @login_required
 def ir(request, num="0"):
     context = {}
@@ -193,8 +169,6 @@ def custom_screen(request, screen_name = "default"):
     context = {}
     context['commands'] = Commands.objects.filter(id = Custom_Screens.objects.filter(name = screen_name))
     return render_to_response('custom_screen.html', context, context_instance=RequestContext(request))
-
-
 
 
 ################
