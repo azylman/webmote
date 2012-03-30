@@ -15,6 +15,13 @@ class Devices(models.Model):
     name = models.CharField(max_length=100, unique=True)
     location = models.CharField(max_length=100)
 
+    def getSubclass(self):
+        for deviceType in Devices.__subclasses__():
+            device = deviceType.objects.filter(name=self.name)
+            if len(device) == 1:
+                return device[0]
+        return False
+        
 # need to make the location a drop down of existing locations with an option to create a new one
 class DeviceForm(ModelForm):
     class Meta:
@@ -92,7 +99,6 @@ class X10_Profiles(models.Model):
 ################
 class IR_Devices(Devices):
     model = models.CharField(max_length=100)
-    #model = models.IR_Device_Database()
 
 
 
