@@ -71,6 +71,7 @@ def devices(request):
     context['profiles'] = unique
     return render_to_response('devices.html', context, context_instance=RequestContext(request))
 
+
 @login_required
 def setup(request):
     context = {}
@@ -97,48 +98,32 @@ def setup(request):
 @login_required
 def device(request, num="1"):
     context = {}
-
-    # Produce an update form for the device
     device = Devices.objects.filter(id=int(num))[0]
-    context['device'] = device.getSubclassInstance()
-    deviceType = type(context['device'])
-    formset = modelformset_factory(deviceType, max_num=0)
-    context['deviceForm'] = formset(queryset=deviceType.objects.filter(name=context['device'].name))
-
-    # Generate a new command form for the device
-    context['commandForm'] = device.getEmptyCommandsForm()
-
-    # Get all existing commands
-    context['commands'] = device.commands_set.all()
-
-    # Handle form submission
+    deviceForm = device.getDeviceForm()
+    commandForm = device.getEmptyCommandsForm()
     if request.method == 'POST':
         if 'updateDevice' in request.POST:
-            print "update device is not finished"
+            #updatedDevice = deviceForm(request.POST, instance=device.getSubclassInstance())
+            #if updatedDevice.is_valid():
+            #    updatedDevice.save()
+#            print "update device is not finished-need to use form instead of formset"
             form = modelformset_factory(deviceType)
             updateFormset = form(request.POST)
             if updateFormset.is_valid():
                 updateFormset.save()
-            # Need to refresh the object here...or put this at the top
         elif 'addCommand' in request.POST:
-            print "addcommand does not work yet"
-            command = formset(request.POST, request.FILES)
-            pprint(command)
-            if command.is_valid():
-                command.save()
-                print "added command"
-
-
-
-#            form = PartialCommandForm(request.POST)
-#            command = Commands(modelNumber=context['device'], \
-#                               name=request.POST['name'], \
-#                               value=request.POST['value'])
-#            if form.is_valid():
-#                command.save()
-#                form.save()
+            command = Commands(device=device)
+            newCommand = commandForm(request.POST, instance=command)
+            pprint(vars(newCommand))
+            if newCommand.is_valid():
+                newCommand.save()
         elif 'deleteCommand' in request.POST:
             Commands.objects.filter(id=request.POST['deleteCommand']).delete()
+    context['device'] = Devices.objects.filter(id=int(num))[0]
+    context['deviceForm'] = deviceForm(instance=device.getSubclassInstance())
+    context['commands'] = []
+    context['commands'] = device.commands_set.all()
+    context['commandForm'] = commandForm
     return render_to_response('device.html', context, context_instance=RequestContext(request))
 
 

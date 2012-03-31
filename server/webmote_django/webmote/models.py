@@ -5,6 +5,7 @@ from django import forms
 ################
 # Webmote Device
 ################
+
 class Devices(models.Model):
     name = models.CharField(max_length=100, unique=True)
     location = models.CharField(max_length=100)
@@ -16,16 +17,32 @@ class Devices(models.Model):
                 return device[0]
         return False
 
+    def getDeviceForm(self):
+        device = self.getSubclassInstance()
+        deviceType = type(device)
+        for devicesFormType in DevicesForm.__subclasses__():
+            typeName = devicesFormType.__name__.replace('_DevicesForm', '')
+            if typeName in type(self.getSubclassInstance()).__name__.replace('_Devices', ''):
+                return devicesFormType
+        return False        
+
     def getEmptyCommandsForm(self):
         for commandsFormType in CommandsForm.__subclasses__():
             typeName = commandsFormType.__name__.replace('_CommandsForm', '')
             if typeName in type(self.getSubclassInstance()).__name__.replace('_Devices', ''):
                 return commandsFormType
         return False
-        
+
+class DevicesForm(ModelForm):
+    class Meta:
+        model = Devices
+
+
+
 #################
 # Webmote Command
 #################
+
 class Commands(models.Model):
     name = models.CharField(max_length=100)
     device = models.ForeignKey(Devices)
@@ -41,6 +58,8 @@ class CommandsForm(ModelForm):
     class Meta:
         model = Commands
     
+
+
 ################
 # X10
 ################
@@ -63,6 +82,11 @@ class X10_Devices(Devices):
     modelNumber = models.CharField(max_length=100, choices=X10_KNOWN_MODELS)
     state = models.IntegerField(default=0)
 
+class X10_DevicesForm(DevicesForm):
+    class Meta:
+        model = X10_Devices
+        exclude = ('state',)
+
 class X10_Commands(Commands):
    # modelNumber = models.ForeignKey(X10_Devices)
     code = models.IntegerField()
@@ -77,11 +101,18 @@ class X10_Profiles(models.Model):
     deviceID = models.IntegerField()
     deviceState = models.IntegerField()
 
+
+
 ################
 # IR
 ################
+
 class IR_Devices(Devices):
     modelNumber = models.CharField(max_length=100)
+
+class IR_DevicesForm(DevicesForm):
+    class Meta:
+        model = IR_Devices
 
 class IR_Commands(Commands):
     code = models.IntegerField()
