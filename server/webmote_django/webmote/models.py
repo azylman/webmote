@@ -1,6 +1,7 @@
 from django.db import models
 from django.forms import ModelForm
 from django import forms
+from django.forms.widgets import TextInput
 
 ################
 # Webmote Device
@@ -18,13 +19,22 @@ class Devices(models.Model):
         return False
 
     def getDeviceForm(self):
-        device = self.getSubclassInstance()
+        device = self
+        if self.getSubclassInstance():
+            device = self.getSubclassInstance()
         deviceType = type(device)
         for devicesFormType in DevicesForm.__subclasses__():
             typeName = devicesFormType.__name__.replace('_DevicesForm', '')
-            if typeName in type(self.getSubclassInstance()).__name__.replace('_Devices', ''):
+            if typeName in type(device).__name__.replace('_Devices', ''):
                 return devicesFormType
-        return False        
+        return False    
+
+    def getCorrespondingCommandType(self):
+        for commandsType in Commands.__subclasses__():
+            typeName = commandsType.__name__.replace('_Commands', '')
+            if typeName in type(self.getSubclassInstance()).__name__.replace('_Devices', ''):
+                return commandsType
+        return False
 
     def getEmptyCommandsForm(self):
         for commandsFormType in CommandsForm.__subclasses__():
@@ -34,6 +44,7 @@ class Devices(models.Model):
         return False
 
 class DevicesForm(ModelForm):
+    location = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Kitchen, Den, etc.'}))
     class Meta:
         model = Devices
 
@@ -55,6 +66,7 @@ class Commands(models.Model):
         return False
 
 class CommandsForm(ModelForm):
+    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. On, Off, etc.'}))
     class Meta:
         model = Commands
     
@@ -83,6 +95,9 @@ class X10_Devices(Devices):
     state = models.IntegerField(default=0)
 
 class X10_DevicesForm(DevicesForm):
+    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Fan, Lamp, etc.'}))
+    house = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Any letter A-P'}))
+    unit = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Any number 1-16'}))
     class Meta:
         model = X10_Devices
         exclude = ('state',)
@@ -92,6 +107,7 @@ class X10_Commands(Commands):
     code = models.IntegerField()
 
 class X10_CommandsForm(CommandsForm):
+    code = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. 1110211'}))
     class Meta:
         model = X10_Commands
         exclude = ('state', 'device')
@@ -111,6 +127,8 @@ class IR_Devices(Devices):
     modelNumber = models.CharField(max_length=100)
 
 class IR_DevicesForm(DevicesForm):
+    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. TV, Stereo, etc.'}))
+    modelNumber = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. abc123'}))
     class Meta:
         model = IR_Devices
 
@@ -118,6 +136,7 @@ class IR_Commands(Commands):
     code = models.IntegerField()
 
 class IR_CommandsForm(CommandsForm):
+    code = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. 1110211'}))
     class Meta:
         model = IR_Commands
         exclude = ('device',)

@@ -71,7 +71,6 @@ def devices(request):
     context['profiles'] = unique
     return render_to_response('devices.html', context, context_instance=RequestContext(request))
 
-
 @login_required
 def setup(request):
     context = {}
@@ -79,20 +78,19 @@ def setup(request):
     context['addDeviceForms'] = []
     for deviceType in Devices.__subclasses__():
         typeName = deviceType.__name__.replace('_Devices', '')
+        context['addDeviceForms'].append([deviceType().getDeviceForm(), typeName])
         context['deviceTypes'].append(typeName)
-        formset = modelformset_factory(deviceType)
-        form = formset(queryset=deviceType.objects.none())
-        context['addDeviceForms'].append([form, typeName])
         if request.method == 'POST':
             if 'new_' + typeName in request.POST:
-                form = modelformset_factory(deviceType)
-                formset = form(request.POST)
-                if formset.is_valid():
-                    formset.save()
+                deviceForm = deviceType().getDeviceForm()
+                newDevice = deviceForm(request.POST)
+                if newDevice.is_valid():
+                    newDevice.save()
             elif 'deleteDevice' in request.POST:
                 Devices.objects.filter(id=request.POST['deleteDevice']).delete()
     context['devices'] = Devices.objects.all()
     return render_to_response('setup.html', context, context_instance=RequestContext(request))
+
 
 
 @login_required
@@ -103,23 +101,23 @@ def device(request, num="1"):
     commandForm = device.getEmptyCommandsForm()
     if request.method == 'POST':
         if 'updateDevice' in request.POST:
-            #updatedDevice = deviceForm(request.POST, instance=device.getSubclassInstance())
-            #if updatedDevice.is_valid():
-            #    updatedDevice.save()
-#            print "update device is not finished-need to use form instead of formset"
-            form = modelformset_factory(deviceType)
-            updateFormset = form(request.POST)
-            if updateFormset.is_valid():
-                updateFormset.save()
+            updatedDevice = deviceForm(request.POST, instance=device.getSubclassInstance())
+            if updatedDevice.is_valid():
+                updatedDevice.save()
+            else:
+                context['error'] = "New value(s) was invalid."
         elif 'addCommand' in request.POST:
-            command = Commands(device=device)
+            commandType = device.getCorrespondingCommandType()
+            command = commandType(device=device)
             newCommand = commandForm(request.POST, instance=command)
-            pprint(vars(newCommand))
             if newCommand.is_valid():
                 newCommand.save()
+            else:
+                context['error'] = "Command was invalid."
         elif 'deleteCommand' in request.POST:
             Commands.objects.filter(id=request.POST['deleteCommand']).delete()
-    context['device'] = Devices.objects.filter(id=int(num))[0]
+    device = Devices.objects.filter(id=int(num))[0]
+    context['device'] = device
     context['deviceForm'] = deviceForm(instance=device.getSubclassInstance())
     context['commands'] = []
     context['commands'] = device.commands_set.all()
