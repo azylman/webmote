@@ -43,6 +43,9 @@ class Devices(models.Model):
                 return commandsFormType
         return False
 
+    def runCommand(self, command):
+        return self.getSubclassInstance().runCommand(command)
+
 class DevicesForm(ModelForm):
     location = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Kitchen, Den, etc.'}))
     class Meta:
@@ -94,6 +97,13 @@ class X10_Devices(Devices):
     modelNumber = models.CharField(max_length=100, choices=X10_KNOWN_MODELS)
     state = models.IntegerField(default=0)
 
+    def runCommand(self, command):
+        print "called run command on X10"
+        if True:
+            return True
+        else:
+            return False
+
 class X10_DevicesForm(DevicesForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Fan, Lamp, etc.'}))
     house = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Any letter A-P'}))
@@ -125,6 +135,13 @@ class X10_Profiles(models.Model):
 
 class IR_Devices(Devices):
     modelNumber = models.CharField(max_length=100)
+
+    def runCommand(self, command):
+        print "called run command on IR"
+        if True:
+            return True
+        else:
+            return False
 
 class IR_DevicesForm(DevicesForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. TV, Stereo, etc.'}))

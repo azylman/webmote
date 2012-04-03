@@ -37,7 +37,8 @@
                             <div class="ui-bar ui-bar-a" style="height:30px">{{ command.name }}</div>
                         </div>
                         <div class="ui-block-b">
-                            <div class="ui-bar ui-bar-a" style="height:30px"><a href="/command/{{ command.id }}/" data-role="button" data-theme="a">Test</a></div>
+<!--                            <div class="ui-bar ui-bar-a" style="height:30px"><a href="/run_command/{{ device.id }}/{{ command.id }}/" data-role="button" data-theme="a" onclick="runCommand('/run_command/{{ device.id }}/{{ command.id }}/')">Test</a></div>-->
+<div class="ui-bar ui-bar-a" style="height:30px"><a href="#" data-role="button" data-theme="a" onclick="runCommand('/run_command/{{ device.id }}/{{ command.id }}/')">Test</a></div>
                         </div>
                         <div class="ui-block-c">
                             <div class="ui-bar ui-bar-a" style="height:30px">
@@ -61,12 +62,4 @@
             </form>
         </div>
     </div>
-<!--                {% for commandForm in addDeviceForms %}-->
-<!--                    <div class="commandForm" id="{{ commandForm.1 }}" style="display:none">-->
-<!--                        <form method="post" action="">{% csrf_token %}-->
-<!--                            {{ commandForm.0.as_table }}-->
-<!--                            <input type="submit" name="new_{{ commandForm.1 }}"" value="Add Command" />-->
-<!--                        </form>-->
-<!--                    </div>-->
-<!--                {% endfor %}-->
 {% endblock %}

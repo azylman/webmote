@@ -44,6 +44,12 @@
             return $('#selectProfile option:selected')[0].value;
         }
 
+        function runCommand(url) {
+            $.ajax({
+                url : url,
+            });
+        }
+
 	    $(document).live("mobileinit", function(){
 	      $.mobile.ajaxFormsEnabled = false;
 	    });

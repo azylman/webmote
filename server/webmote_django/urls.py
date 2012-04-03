@@ -32,9 +32,9 @@ urlpatterns = patterns('',
     ),
 
     # Pages
-    url(r'^setstate/(?P<num>\d+)/(?P<state>\d+)/$', 'webmote_django.webmote.views.setState'),
-    url(r'^ir/(?P<num>\d+)/$', 'webmote_django.webmote.views.ir'),
-    url(r'^devices/$', 'webmote_django.webmote.views.devices'),
+    url(r'^run_command/(?P<deviceNum>\d+)/(?P<command>\d+)/$', 'webmote_django.webmote.views.runCommand'),
+    url(r'^rooms/$', 'webmote_django.webmote.views.rooms'),
+    url(r'^devices/(?P<room>\w+)$', 'webmote_django.webmote.views.devices'),
     url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
     url(r'^controller/$', 'webmote_django.webmote.views.index'),
     url(r'^setup/$', 'webmote_django.webmote.views.setup'),

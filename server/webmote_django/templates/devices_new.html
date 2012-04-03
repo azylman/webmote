@@ -11,10 +11,15 @@
     <p>Go ahead and take control by logging in.</p>
     <a data-role="button" href="{% url login %}">Log In</a>
 {% else %}
-    <div data-role="content">	
+    <div data-role="content">
+        {% if room == "all" %}
+            <h1>All Devices</h1>
+        {% else %}
+            <h1>Devices in {{ room }}</h1>
+        {% endif %}
         <ul data-role="listview" data-inset="true">
-            {% for room in rooms %}
-            <li><a href="/devices/{{ room }}">{{ room }}</a></li>
+            {% for Device in devices %}
+            <li><a href="/device/{{ Device.id }}">{{ Device.name }}</a></li>
             {% endfor %}
         </ul>
     </div>
