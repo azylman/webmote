@@ -162,3 +162,9 @@ class IR_CommandsForm(CommandsForm):
 # IR Database (Alex Z)
 ################
     
+class IR_Database(models.Model):
+    manufacturer = models.CharField(max_length=100)
+    model = models.CharField(max_length=100)
+    command = models.CharField(max_length=100)
+    normalized_command = name = models.CharField(max_length=100)
+    code = name = models.CharField(max_length=1000)
