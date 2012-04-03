@@ -8,6 +8,7 @@ from django.core.context_processors import csrf
 from django.shortcuts import render_to_response, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.views import logout_then_login
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from webmote_django.webmote.models import *
 import serial, sys, os
@@ -27,7 +28,7 @@ def identification(request):
 
 @login_required
 def index(request):
-    return render_to_response('index.html')
+    return render_to_response('index.html', context_instance=RequestContext(request))
 
 def logout_view(request):
     logout(request)
@@ -44,6 +45,13 @@ def runCommand(request, deviceNum="1", command="0"):
         device.save()
     return render_to_response('index.html')
 
+@login_required
+def users(request):
+    if request.user.is_superuser:
+        context = {}
+        context['devices'] = Devices.objects.all()
+        context['users'] = User.objects.all()
+        return render_to_response('users.html', context, context_instance=RequestContext(request))
 #@login_required
 #def devices(request):
 #    context = {}
@@ -107,8 +115,6 @@ def setup(request):
     context['devices'] = Devices.objects.all()
     return render_to_response('setup.html', context, context_instance=RequestContext(request))
 
-
-
 @login_required
 def device(request, num="1"):
     context = {}
@@ -139,12 +145,10 @@ def device(request, num="1"):
     context['commandForm'] = commandForm
     return render_to_response('device.html', context, context_instance=RequestContext(request))
 
-
-
 @login_required
 def rooms(request):
     context = {}
-    # Not sure why this doesnt work...
+    # Not sure why this doesnt work...w/e
     #context['rooms'] = Devices.objects.order_by('location').distinct('location')
     context['rooms'] = []
     for Device in Devices.objects.all():
@@ -159,6 +163,8 @@ def custom_screen(request, screen_name = "default"):
     return render_to_response('custom_screen.html', context, context_instance=RequestContext(request))
 
 
+
+# All of this stuff needs to migrate to models repspectively
 ################
 # X10
 ################

@@ -12,12 +12,18 @@
     <a data-role="button" href="{% url login %}">Log In</a>
 {% else %}
     <div data-role="content">	
-        <ul data-role="listview" data-inset="true">
+        <ul data-role="listview" data-inset="true" id="userOptions">
             <li><a href="/custom_screens/">Custom Screens</a></li>
             <li><a href="/rooms/">Rooms</a></li>
             <li><a href="/devices/all">All Devices</a></li>
-            <li><a href="/setup/">Setup/Config</a></li>
+            <li><a href="/user_setup/">Setup/Config (not started, maybe macro's and profiles?)</a></li>
         </ul>
+        {% if user.is_superuser %}
+            <ul data-role="listview" data-inset="true" id="adminOptions">
+                <li><a href="/users/">Manage Users</a></li>
+                <li><a href="/setup/">Setup/Config</a></li>
+            </ul>
+        {% endif %}
     </div>
 {% endif %}
 {% endblock %}

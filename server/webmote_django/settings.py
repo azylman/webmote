@@ -116,13 +116,13 @@ TEMPLATE_DIRS = (
 )
 
 # Not sure what this does and/or why this is needed... -Dan
-TEMPLATE_CONTEXT_PROCESSORS = [
+TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.auth",
     "django.core.context_processors.debug",
     "django.core.context_processors.i18n",
     "django.core.context_processors.static",
     "django.core.context_processors.request",
-]
+)
 
 LOGIN_REDIRECT_URL = '/'
 
