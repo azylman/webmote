@@ -38,6 +38,10 @@
                 });
                 $(divID).css("display", "inline");
             });
+
+            $('#user-0, #device-0').change(function () {
+                $('input[id^=' + this.id.split('-')[0] + ']').attr('checked',this.checked).checkboxradio('refresh');
+            });
         });
 
         function getSelectedProfile() {

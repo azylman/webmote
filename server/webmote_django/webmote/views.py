@@ -51,7 +51,18 @@ def users(request):
         context = {}
         context['devices'] = Devices.objects.all()
         context['users'] = User.objects.all()
+        context['newUserForm'] = UserForm()
+        if request.method == 'POST':
+            if 'addUser' in request.POST:
+                form = UserForm(request.POST)
+                if form.is_valid():
+                    user = User.objects.create_user(form.instance.username, form.instance.email, form.instance.password)
+                    user.first_name = form.instance.first_name
+                    user.last_name = form.instance.last_name
+                    user.save()
         return render_to_response('users.html', context, context_instance=RequestContext(request))
+
+
 #@login_required
 #def devices(request):
 #    context = {}

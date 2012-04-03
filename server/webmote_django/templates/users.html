@@ -10,36 +10,46 @@ Users - Home Control
 
 {% block content %}
     <div data-role="content">
-        <div id="selectUsers" data-role="fieldcontain">
-            <h2>Available Users</h2>
-            <fieldset data-role="controlgroup">
-                <legend>Select user(s) to modify:</legend>
-                <input type="checkbox" name="user-0" id="user-0" class="custom" />
-	            <label for="user-0">All Users</label>
-            {% for user in users %}
-                <input type="checkbox" name="user-{{ user.id }}" id="user-{{ user.id }}" class="custom" />
-                <label for="user-{{ user.id }}">{{ user.username }} ({{ user.first_name }} {{ user.last_name }})</label>
-            {% endfor %}
-            </fieldset>
+        <div id="usersDevicesPermissions">
+            <h2>Device Access for Users</h2>
+            <div id="selectUsers" data-role="fieldcontain">
+                <h3>Users</h3>
+                <fieldset data-role="controlgroup">
+                    <legend>Select user(s) to modify:</legend>
+                    <input type="checkbox" name="user-0" id="user-0" class="custom" />
+                    <label for="user-0">All Users</label>
+                {% for user in users %}
+                    <input type="checkbox" name="user-{{ user.id }}" id="user-{{ user.id }}" class="custom" />
+                    <label for="user-{{ user.id }}">{{ user.username }} ({{ user.first_name }} {{ user.last_name }})</label>
+                {% endfor %}
+                </fieldset>
+            </div>
+            <div id="availableDevices">
+                <h3>Devices</h3>
+                {% if devices %}
+                    <div id="allowDeviceControl" data-role="fieldcontain">
+                        <fieldset data-role="controlgroup">
+                            <legend>Select devices for the user(s) to control:</legend>
+                            <input type="checkbox" name="device-0" id="device-0" class="custom" />
+			                <label for="device-0">All Devices</label>
+                            {% for device in devices %}
+                                <input type="checkbox" name="device-{{ device.id }}" id="device-{{ device.id }}" class="custom" />
+				                <label for="device-{{ device.id }}">{{ device.name }} ({{ device.location }})</label>
+                            {% endfor %}
+                        </fieldset>
+                    </div>
+                    <a href="#" data-role="button" onclick="saveUserDevicePermissions()">Save</a>
+                {% else %}
+                    <h3>Currently there are no devices.</h3>
+                {% endif %}
+            </div>
         </div>
-        <div id="availableDevices">
-            <h2>Available Devices</h2>
-            {% if devices %}
-                <div id="allowDeviceControl" data-role="fieldcontain">
-                    <fieldset data-role="controlgroup">
-                        <legend>Select devices for the user(s) to control:</legend>
-                        <input type="checkbox" name="checkbox-0" id="checkbox-0" class="custom" />
-				        <label for="checkbox-0">All Devices</label>
-                        {% for device in devices %}
-                            <input type="checkbox" name="device-{{ device.id }}" id="device-{{ device.id }}" class="custom" />
-					        <label for="device-{{ device.id }}">{{ device.name }} ({{ device.location }})</label>
-                        {% endfor %}
-                    </fieldset>
-                </div>
-                <a href="#" data-role="button" onclick="saveUserDevicePermissions()">Save</a>
-            {% else %}
-                <h3>Currently there are no devices.</h3>
-            {% endif %}
+        <div id="addUser">
+            <h2>Add New User</h2>
+            <form method="POST" action="">{% csrf_token %}
+                {{ newUserForm.as_table }}
+                <input type="submit" name="addUser" value="Add User" />
+            </form>
         </div>
     </div>
 {% endblock %}
