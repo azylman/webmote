@@ -4,13 +4,6 @@ from django import forms
 from django.forms.widgets import TextInput, PasswordInput
 from django.contrib.auth.models import User
 
-
-class UserForm(ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput())
-    class Meta:
-        model = User
-        fields = ('username','email','password', 'first_name', 'last_name')
-
 ################
 # Webmote Device
 ################
@@ -176,3 +169,21 @@ class IR_Database(models.Model):
     command = models.CharField(max_length=100)
     normalized_command = models.CharField(max_length=100)
     code = models.CharField(max_length=1000)
+
+
+################
+# Misc.
+################
+
+class UserForm(ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput())
+    class Meta:
+        model = User
+        fields = ('username','email','password', 'first_name', 'last_name')
+
+class UserPermissions(models.Model):
+    user = models.ForeignKey(User)
+    device = models.ForeignKey(Devices)
+
+
+

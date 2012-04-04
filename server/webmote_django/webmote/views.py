@@ -46,7 +46,7 @@ def runCommand(request, deviceNum="1", command="0"):
     return render_to_response('index.html')
 
 @login_required
-def user_permissions(request):
+def userPermissions(request):
     if request.user.is_superuser:
         context = {}
         context['devices'] = Devices.objects.all()
@@ -54,7 +54,17 @@ def user_permissions(request):
         context['newUserForm'] = UserForm()
         if request.method == 'POST':
             print "got a post on user permissions???"
-        return render_to_response('user_permissions.html', context, context_instance=RequestContext(request))
+        return render_to_response('userPermissions.html', context, context_instance=RequestContext(request))
+
+@login_required
+def setUserPermissions(request, userID = "0", deviceID = "0"):
+    if request.user.is_superuser:
+        for permission in UserPermissions.objects.filter(user=int(userID)):
+            permission.delete()
+        device = Devices.objects.filter(id=int(deviceID))[0]
+        user = User.objects.filter(id=int(userID))[0]
+        UserPermissions(user=user, device=device).save()
+    return render_to_response('index.html')
 
 @login_required
 def users(request, userID = "0"):

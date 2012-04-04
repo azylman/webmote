@@ -42,6 +42,27 @@
             $('#user-0, #device-0').change(function () {
                 $('input[id^=' + this.id.split('-')[0] + ']').attr('checked',this.checked).checkboxradio('refresh');
             });
+
+            $('[id^=user-]').change(function () {
+                if (this.id.split('-')[1] > 0) {
+                    alert(this.id.split('-')[1] + '=userID, clicking one user will eventually populate the devices checkboxes');
+                    // Determine howmany others are checked
+                    //numChecked = howmanychecked?;
+                    /*
+                    if (numUsersChecked == 1) {
+                        // Request and set states
+                        populateCheckBoxes(states);   
+                    } else if (numUsersChecked == 2) {
+                        // set all states to off
+                        populateCheckBoxes(off);
+                    } else {
+                        // Do nothing...why is this here lol
+                    }
+                    */
+                }
+            });
+            // A function to show the devices when a single user is selected on 
+
         });
 
         function getSelectedProfile() {
@@ -54,6 +75,13 @@
             });
         }
 
+        function savePermissions() {
+            // For each selected user 
+                // For each device
+            alert('not yet implemented');
+
+        }
+
 	    $(document).live("mobileinit", function(){
 	      $.mobile.ajaxFormsEnabled = false;
 	    });
@@ -61,7 +89,6 @@
 	    $(document).live("mobileinit", function(){
 	      $.mobile.ajaxLinksEnabled = false;
 	    });
-
     </script>
 
 
