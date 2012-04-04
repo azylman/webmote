@@ -17,11 +17,18 @@
         {% else %}
             <h1>Devices in {{ room }}</h1>
         {% endif %}
-        <ul data-role="listview" data-inset="true">
-            {% for Device in devices %}
-            <li><a href="/device/{{ Device.id }}">{{ Device.name }}</a></li>
-            {% endfor %}
-        </ul>
+        {% if devices %}
+            <ul data-role="listview" data-inset="true">
+                {% for Device in devices %}
+                    <li><a href="/device/{{ Device.id }}">{{ Device.name }} ({{ Device.location }})</a></li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <h3>Currently there are no devices or none that you have been granted access to.</h3>
+            {% if user.is_superuser %}
+                <h3>Add a device new device in <a href="/setup/">Setup/Config</a></h3>
+            {% endif %}
+        {% endif %}
     </div>
 {% endif %}
 {% endblock %}

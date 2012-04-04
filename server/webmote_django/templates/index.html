@@ -20,8 +20,10 @@
         </ul>
         {% if user.is_superuser %}
             <ul data-role="listview" data-inset="true" id="adminOptions">
-                <li><a href="/users/">Manage Users</a></li>
-                <li><a href="/setup/">Setup/Config</a></li>
+                <li><a href="/users/">Add/Delete Users</a></li>
+                <li><a href="/user_permissions/">Manage User Permissions</a></li>
+                <li><a href="/setup/">Setup Devices</a></li>
+                <li><a href="/admin/">Django Admin</a></li>
             </ul>
         {% endif %}
     </div>

@@ -46,10 +46,20 @@ def runCommand(request, deviceNum="1", command="0"):
     return render_to_response('index.html')
 
 @login_required
-def users(request):
+def user_permissions(request):
     if request.user.is_superuser:
         context = {}
         context['devices'] = Devices.objects.all()
+        context['users'] = User.objects.all()
+        context['newUserForm'] = UserForm()
+        if request.method == 'POST':
+            print "got a post on user permissions???"
+        return render_to_response('user_permissions.html', context, context_instance=RequestContext(request))
+
+@login_required
+def users(request, userID = "0"):
+    if request.user.is_superuser:
+        context = {}
         context['users'] = User.objects.all()
         context['newUserForm'] = UserForm()
         if request.method == 'POST':
@@ -60,6 +70,8 @@ def users(request):
                     user.first_name = form.instance.first_name
                     user.last_name = form.instance.last_name
                     user.save()
+            if 'deleteUser' in request.POST:
+                User.objects.filter(id=request.POST['deleteUser']).delete()
         return render_to_response('users.html', context, context_instance=RequestContext(request))
 
 
@@ -159,8 +171,6 @@ def device(request, num="1"):
 @login_required
 def rooms(request):
     context = {}
-    # Not sure why this doesnt work...w/e
-    #context['rooms'] = Devices.objects.order_by('location').distinct('location')
     context['rooms'] = []
     for Device in Devices.objects.all():
         if not Device.location in context['rooms']:
