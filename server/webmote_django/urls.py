@@ -45,6 +45,7 @@ urlpatterns = patterns('',
     url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
     url(r'^controller/$', 'webmote_django.webmote.views.index'),
     url(r'^setup/$', 'webmote_django.webmote.views.setup'),
+    url(r'^user_setup/$', 'webmote_django.webmote.views.setup'),
     url(r'^logout/$', 'webmote_django.webmote.views.logout_view'),
     url(r'^identification/$', 'webmote_django.webmote.views.identification'),
    
