@@ -119,6 +119,8 @@
         }
 
         function savePermissions() {
+            $.mobile.loadingMessage = 'Saving Permissions';
+            $.mobile.showPageLoadingMsg();
             var permissions = {};
             $('[id^=user-]').each(function(index) {
                 var userID = this.id.split('-')[1];
@@ -141,7 +143,7 @@
                 data: JSON.stringify(permissions),
                 dataType: 'text',
                 success: function(result) {
-                    //alert(result.Result);
+                    $.mobile.hidePageLoadingMsg();
                 }
             });
         }

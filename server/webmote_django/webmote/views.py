@@ -73,7 +73,7 @@ def setUserPermissions(permissions):
             device = Devices.objects.filter(id=int(device))[0]
             user = User.objects.filter(id=int(userID))[0]
             UserPermissions(user=user, device=device).save()
-    return render_to_response('index.html')
+    return True
 
 @login_required
 def users(request, userID = "0"):

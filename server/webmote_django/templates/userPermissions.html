@@ -19,8 +19,10 @@ Users - Home Control
                     <input type="checkbox" name="user-0" id="user-0" class="custom" />
                     <label for="user-0">All Users</label>
                 {% for user in users %}
-                    <input type="checkbox" name="user-{{ user.id }}" id="user-{{ user.id }}" class="custom" />
-                    <label for="user-{{ user.id }}">{{ user.username }} ({{ user.first_name }} {{ user.last_name }})</label>
+                    {% if not user.is_superuser %}
+                        <input type="checkbox" name="user-{{ user.id }}" id="user-{{ user.id }}" class="custom" />
+                        <label for="user-{{ user.id }}">{{ user.username }} ({{ user.first_name }} {{ user.last_name }})</label>
+                    {% endif %}
                 {% endfor %}
                 </fieldset>
             </div>
