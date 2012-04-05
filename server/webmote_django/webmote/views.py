@@ -131,69 +131,74 @@ def devices(request, room="all"):
     context = {}
     context['room'] = room
     if room == "all":
-        context['devices'] = Devices.objects.all()
+        context['devices'] = getAllowedDevices(request.user.id)
     else:
-        context['devices'] = Devices.objects.filter(location=room)
+        context['devices'] = []
+        for device in getAllowedDevices(request.user.id):
+            if device.location == room:
+                context['devices'].append(device)
     return render_to_response('devices_new.html', context, context_instance=RequestContext(request))
 
     
 @login_required
 def setup(request):
-    context = {}
-    context['deviceTypes'] = []
-    context['addDeviceForms'] = []
-    for deviceType in Devices.__subclasses__():
-        typeName = deviceType.__name__.replace('_Devices', '')
-        context['addDeviceForms'].append([deviceType().getDeviceForm(), typeName])
-        context['deviceTypes'].append(typeName)
-        if request.method == 'POST':
-            if 'new_' + typeName in request.POST:
-                deviceForm = deviceType().getDeviceForm()
-                newDevice = deviceForm(request.POST)
-                if newDevice.is_valid():
-                    newDevice.save()
-            elif 'deleteDevice' in request.POST:
-                Devices.objects.filter(id=request.POST['deleteDevice']).delete()
-    context['devices'] = Devices.objects.all()
-    return render_to_response('setup.html', context, context_instance=RequestContext(request))
+    if request.user.is_superuser:
+        context = {}
+        context['deviceTypes'] = []
+        context['addDeviceForms'] = []
+        for deviceType in Devices.__subclasses__():
+            typeName = deviceType.__name__.replace('_Devices', '')
+            context['addDeviceForms'].append([deviceType().getDeviceForm(), typeName])
+            context['deviceTypes'].append(typeName)
+            if request.method == 'POST':
+                if 'new_' + typeName in request.POST:
+                    deviceForm = deviceType().getDeviceForm()
+                    newDevice = deviceForm(request.POST)
+                    if newDevice.is_valid():
+                        newDevice.save()
+                elif 'deleteDevice' in request.POST:
+                    Devices.objects.filter(id=request.POST['deleteDevice']).delete()
+        context['devices'] = Devices.objects.all()
+        return render_to_response('setup.html', context, context_instance=RequestContext(request))
 
 @login_required
 def device(request, num="1"):
-    context = {}
-    device = Devices.objects.filter(id=int(num))[0]
-    deviceForm = device.getDeviceForm()
-    commandForm = device.getEmptyCommandsForm()
-    if request.method == 'POST':
-        if 'updateDevice' in request.POST:
-            updatedDevice = deviceForm(request.POST, instance=device.getSubclassInstance())
-            if updatedDevice.is_valid():
-                updatedDevice.save()
-            else:
-                context['error'] = "New value(s) was invalid."
-        elif 'addCommand' in request.POST:
-            commandType = device.getCorrespondingCommandType()
-            command = commandType(device=device)
-            newCommand = commandForm(request.POST, instance=command)
-            if newCommand.is_valid():
-                newCommand.save()
-            else:
-                context['error'] = "Command was invalid."
-        elif 'deleteCommand' in request.POST:
-            Commands.objects.filter(id=request.POST['deleteCommand']).delete()
-    device = Devices.objects.filter(id=int(num))[0]
-    context['device'] = device
-    context['deviceForm'] = deviceForm(instance=device.getSubclassInstance())
-    context['commands'] = device.commands_set.all()
-    context['commandForm'] = commandForm
-    return render_to_response('device.html', context, context_instance=RequestContext(request))
+    if request.user.is_superuser:
+        context = {}
+        device = Devices.objects.filter(id=int(num))[0]
+        deviceForm = device.getDeviceForm()
+        commandForm = device.getEmptyCommandsForm()
+        if request.method == 'POST':
+            if 'updateDevice' in request.POST:
+                updatedDevice = deviceForm(request.POST, instance=device.getSubclassInstance())
+                if updatedDevice.is_valid():
+                    updatedDevice.save()
+                else:
+                    context['error'] = "New value(s) was invalid."
+            elif 'addCommand' in request.POST:
+                commandType = device.getCorrespondingCommandType()
+                command = commandType(device=device)
+                newCommand = commandForm(request.POST, instance=command)
+                if newCommand.is_valid():
+                    newCommand.save()
+                else:
+                    context['error'] = "Command was invalid."
+            elif 'deleteCommand' in request.POST:
+                Commands.objects.filter(id=request.POST['deleteCommand']).delete()
+        device = Devices.objects.filter(id=int(num))[0]
+        context['device'] = device
+        context['deviceForm'] = deviceForm(instance=device.getSubclassInstance())
+        context['commands'] = device.commands_set.all()
+        context['commandForm'] = commandForm
+        return render_to_response('device.html', context, context_instance=RequestContext(request))
 
 @login_required
 def rooms(request):
     context = {}
     context['rooms'] = []
-    for Device in Devices.objects.all():
-        if not Device.location in context['rooms']:
-            context['rooms'].append(Device.location)
+    for device in getAllowedDevices(request.user.id):
+        if not device.location in context['rooms']:
+            context['rooms'].append(device.location)
     return render_to_response('rooms.html', context, context_instance=RequestContext(request))
 
 @login_required
@@ -202,6 +207,14 @@ def custom_screen(request, screen_name = "default"):
     context['commands'] = Commands.objects.filter(id = Custom_Screens.objects.filter(name = screen_name))
     return render_to_response('custom_screen.html', context, context_instance=RequestContext(request))
 
+def getAllowedDevices(userID):
+    if User.objects.filter(id=int(userID))[0].is_superuser:
+        return Devices.objects.all()
+    else:
+        devices = []
+        for perm in UserPermissions.objects.filter(user=int(userID)):
+            devices.append(Devices.objects.filter(id=perm.device.id)[0])
+        return devices
 
 
 # All of this stuff needs to migrate to models repspectively
