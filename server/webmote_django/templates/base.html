@@ -68,6 +68,44 @@
                     }
                 }
             });
+            
+            // Included for POSTS with jquery - DO NOT MODIFY (https://docs.djangoproject.com/en/dev/ref/contrib/csrf/)
+            jQuery(document).ajaxSend(function(event, xhr, settings) {
+                function getCookie(name) {
+                    var cookieValue = null;
+                    if (document.cookie && document.cookie != '') {
+                        var cookies = document.cookie.split(';');
+                        for (var i = 0; i < cookies.length; i++) {
+                            var cookie = jQuery.trim(cookies[i]);
+                            // Does this cookie string begin with the name we want?
+                            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                break;
+                            }
+                        }
+                    }
+                    return cookieValue;
+                }
+                function sameOrigin(url) {
+                    // url could be relative or scheme relative or absolute
+                    var host = document.location.host; // host + port
+                    var protocol = document.location.protocol;
+                    var sr_origin = '//' + host;
+                    var origin = protocol + sr_origin;
+                    // Allow absolute or scheme relative URLs to same origin
+                    return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
+                        (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
+                        // or any other URL that isn't scheme relative or absolute i.e relative.
+                        !(/^(\/\/|http:|https:).*/.test(url));
+                }
+                function safeMethod(method) {
+                    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+                }
+
+                if (!safeMethod(settings.type) && sameOrigin(settings.url)) {
+                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                }
+            });
         });
 
         function getSelectedProfile() {
@@ -80,19 +118,30 @@
             });
         }
 
-        // This doesn't ensure order so the bug here is that the clear may arrive after one of the sets. The logic needs to be reworked at some point to send a single object at once so this problem cannot happen.
         function savePermissions() {
+            var permissions = {};
             $('[id^=user-]').each(function(index) {
                 var userID = this.id.split('-')[1];
                 if (userID > 0 && this.checked) {
                     // Clear a users existing permissions
-                    runCommand('/user_permissions/' + userID + '/0/');
+                    permissions[userID] = [];
                     $('[id^=device-]').each(function(index) {
                         var deviceId = this.id.split('-')[1];
                         if (deviceId > 0 && this.checked) {
-                            runCommand('/user_permissions/' + userID + '/' + deviceId + '/');
+                            permissions[userID].push(deviceId);
                         }
                     });
+                }
+            });
+            // Post this data to backend
+            $.ajax({
+                url: '/user_permissions/',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(permissions),
+                dataType: 'text',
+                success: function(result) {
+                    //alert(result.Result);
                 }
             });
         }

@@ -48,6 +48,9 @@ def runCommand(request, deviceNum="1", command="0"):
 @login_required
 def userPermissions(request):
     if request.user.is_superuser:
+        if request.method == 'POST':
+            permissions = simplejson.loads(request.raw_post_data)
+            setUserPermissions(permissions)
         context = {}
         context['devices'] = Devices.objects.all()
         context['users'] = User.objects.all()
@@ -62,14 +65,12 @@ def userPermissionsInfo(request, userID = "0"):
             permissions.append(perm.device.id)
         return HttpResponse(simplejson.dumps(permissions), mimetype='application/javascript')
 
-@login_required
-def setUserPermissions(request, userID = "0", deviceID = "0"):
-    if request.user.is_superuser:
-        if deviceID == "0":
-            for permission in UserPermissions.objects.filter(user=int(userID)):
-                permission.delete()
-        else:
-            device = Devices.objects.filter(id=int(deviceID))[0]
+def setUserPermissions(permissions):
+    for userID in permissions.keys():
+        for permission in UserPermissions.objects.filter(user=int(userID)):
+            permission.delete()
+        for device in permissions[userID]:
+            device = Devices.objects.filter(id=int(device))[0]
             user = User.objects.filter(id=int(userID))[0]
             UserPermissions(user=user, device=device).save()
     return render_to_response('index.html')
