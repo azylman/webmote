@@ -12,7 +12,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from webmote_django.webmote.models import *
 import serial, sys, os
-
+from django.utils import simplejson
 
 # This allows the javascript locater to find the server
 def identification(request):
@@ -51,19 +51,27 @@ def userPermissions(request):
         context = {}
         context['devices'] = Devices.objects.all()
         context['users'] = User.objects.all()
-        context['newUserForm'] = UserForm()
-        if request.method == 'POST':
-            print "got a post on user permissions???"
         return render_to_response('userPermissions.html', context, context_instance=RequestContext(request))
+
+@login_required
+def userPermissionsInfo(request, userID = "0"):
+    if request.user.is_superuser:
+        user = User.objects.filter(id=int(userID))[0]
+        permissions = []
+        for perm in UserPermissions.objects.filter(user=user):
+            permissions.append(perm.device.id)
+        return HttpResponse(simplejson.dumps(permissions), mimetype='application/javascript')
 
 @login_required
 def setUserPermissions(request, userID = "0", deviceID = "0"):
     if request.user.is_superuser:
-        for permission in UserPermissions.objects.filter(user=int(userID)):
-            permission.delete()
-        device = Devices.objects.filter(id=int(deviceID))[0]
-        user = User.objects.filter(id=int(userID))[0]
-        UserPermissions(user=user, device=device).save()
+        if deviceID == "0":
+            for permission in UserPermissions.objects.filter(user=int(userID)):
+                permission.delete()
+        else:
+            device = Devices.objects.filter(id=int(deviceID))[0]
+            user = User.objects.filter(id=int(userID))[0]
+            UserPermissions(user=user, device=device).save()
     return render_to_response('index.html')
 
 @login_required

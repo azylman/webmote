@@ -45,24 +45,29 @@
 
             $('[id^=user-]').change(function () {
                 if (this.id.split('-')[1] > 0) {
-                    alert(this.id.split('-')[1] + '=userID, clicking one user will eventually populate the devices checkboxes');
                     // Determine howmany others are checked
-                    //numChecked = howmanychecked?;
-                    /*
-                    if (numUsersChecked == 1) {
-                        // Request and set states
-                        populateCheckBoxes(states);   
-                    } else if (numUsersChecked == 2) {
-                        // set all states to off
-                        populateCheckBoxes(off);
-                    } else {
-                        // Do nothing...why is this here lol
+                    var numChecked = 0;
+                    var checkedID = 0;
+                    $('[id^=user-]').each(function(index) {
+                        if (this.id.split('-')[1] > 0 && this.checked) {
+                            numChecked++;
+                            checkedID = this.id.split('-')[1];
+                        }
+                    });
+                    if (numChecked == 1) {
+                        // Get information about user's current permissions
+                        $.getJSON('/user_permissions_info/' + checkedID + '/', function(data) {
+                            for (i = 0; i < data.length; i++) {
+                                $('#device-' + data[i]).attr('checked',true).checkboxradio('refresh');
+                            }
+                        });
                     }
-                    */
+                    if (numChecked == 2 || numChecked== 0) {
+                        // Clear 
+                        $('[id^=device-]').attr('checked', false).checkboxradio('refresh');
+                    }
                 }
             });
-            // A function to show the devices when a single user is selected on 
-
         });
 
         function getSelectedProfile() {
@@ -75,11 +80,21 @@
             });
         }
 
+        // This doesn't ensure order so the bug here is that the clear may arrive after one of the sets. The logic needs to be reworked at some point to send a single object at once so this problem cannot happen.
         function savePermissions() {
-            // For each selected user 
-                // For each device
-            alert('not yet implemented');
-
+            $('[id^=user-]').each(function(index) {
+                var userID = this.id.split('-')[1];
+                if (userID > 0 && this.checked) {
+                    // Clear a users existing permissions
+                    runCommand('/user_permissions/' + userID + '/0/');
+                    $('[id^=device-]').each(function(index) {
+                        var deviceId = this.id.split('-')[1];
+                        if (deviceId > 0 && this.checked) {
+                            runCommand('/user_permissions/' + userID + '/' + deviceId + '/');
+                        }
+                    });
+                }
+            });
         }
 
 	    $(document).live("mobileinit", function(){
