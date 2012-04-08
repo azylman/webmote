@@ -176,3 +176,16 @@ class IR_Database(models.Model):
     command = models.CharField(max_length=100)
     normalized_command = models.CharField(max_length=100)
     code = models.CharField(max_length=1000)
+    
+    def parseFromLine(self, line):
+        values = line.strip().split(',')
+        manufacturer = values[0]
+        model = values[1]
+        command = values[2]
+        normalized_command = values[3]
+        code = values[4]
+
+    def parseFromFile(self, file):
+        f = open(file, 'r')
+        for line in f:
+            parseFromLine(self, line)
