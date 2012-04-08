@@ -5,66 +5,10 @@
 <head>
     {% if 1 %}
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes"> 
-    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.css" />
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
-    <script type="text/javascript" src="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.js"></script>
-    <script type="text/javascript" charset="utf-8">
-
-        $(document).ready(function() {
-            $("a").attr("rel","external");
-
-            $('.on_off_light').change(function() {
-                var el = $(this).children('select');
-                var deviceID = el.attr('id').split('-')[1];
-                var state = el.attr('value') == "on" ? 1:0;
-                $.ajax({
-                    url : '/setstate/' + deviceID + '/' + state,
-                });
-            });
-
-            $('.dimmable_light').change(function() {
-                var el = $(this).children('input');
-                var deviceID = el.attr('id').split('-')[1];
-                var state = el.attr('value');
-                $.ajax({
-                    url : '/setstate/' + deviceID + '/' + state,
-                });
-            });
-
-            $('#selectDeviceType').change(function() {
-                var divID = 'div.deviceForm#' +$(this).val();
-                $('div.deviceForm').each(function() {
-                    $(this).css("display", "none");
-                });
-                $(divID).css("display", "inline");
-            });
-
-            $('#user-0, #device-0').change(function () {
-                $('input[id^=' + this.id.split('-')[0] + ']').attr('checked',this.checked).checkboxradio('refresh');
-            });
-        });
-
-        function getSelectedProfile() {
-            return $('#selectProfile option:selected')[0].value;
-        }
-
-        function runCommand(url) {
-            $.ajax({
-                url : url,
-            });
-        }
-
-	    $(document).live("mobileinit", function(){
-	      $.mobile.ajaxFormsEnabled = false;
-	    });
-
-	    $(document).live("mobileinit", function(){
-	      $.mobile.ajaxLinksEnabled = false;
-	    });
-
-    </script>
-
-
+    <link rel="stylesheet" href="{{ STATIC_URL }}js/jqm/jquery.mobile-1.0.min.css" />
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.6.4.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jqm/jquery.mobile-1.0.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/base.js"></script>
 
     <!--Dialog Boxes-->
 <!--    <link rel="stylesheet" type="text/css" href="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog.min.css" />-->

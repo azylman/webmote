@@ -13,15 +13,17 @@
 {% else %}
     <div data-role="content">	
         <ul data-role="listview" data-inset="true" id="userOptions">
-            <li><a href="/custom_screens/">Custom Screens</a></li>
+            <li><a href="/custom_screens/">Custom Screens(not started)</a></li>
             <li><a href="/rooms/">Rooms</a></li>
             <li><a href="/devices/all">All Devices</a></li>
             <li><a href="/user_setup/">Setup/Config (not started, maybe macro's and profiles?)</a></li>
         </ul>
         {% if user.is_superuser %}
             <ul data-role="listview" data-inset="true" id="adminOptions">
-                <li><a href="/users/">Manage Users</a></li>
-                <li><a href="/setup/">Setup/Config</a></li>
+                <li><a href="/users/">Add/Delete Users</a></li>
+                <li><a href="/user_permissions/">Manage User Permissions</a></li>
+                <li><a href="/setup/">Setup Devices</a></li>
+                <li><a href="/admin/">Django Admin</a></li>
             </ul>
         {% endif %}
     </div>

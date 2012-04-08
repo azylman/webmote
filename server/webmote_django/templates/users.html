@@ -10,39 +10,29 @@ Users - Home Control
 
 {% block content %}
     <div data-role="content">
-        <div id="usersDevicesPermissions">
-            <h2>Device Access for Users</h2>
-            <div id="selectUsers" data-role="fieldcontain">
-                <h3>Users</h3>
-                <fieldset data-role="controlgroup">
-                    <legend>Select user(s) to modify:</legend>
-                    <input type="checkbox" name="user-0" id="user-0" class="custom" />
-                    <label for="user-0">All Users</label>
-                {% for user in users %}
-                    <input type="checkbox" name="user-{{ user.id }}" id="user-{{ user.id }}" class="custom" />
-                    <label for="user-{{ user.id }}">{{ user.username }} ({{ user.first_name }} {{ user.last_name }})</label>
-                {% endfor %}
-                </fieldset>
+        <div id="users">
+            <div class="ui-grid-a" id="users_grid_fields">
+                <div class="ui-block-a">
+                    <div class="ui-bar ui-bar-a" style="height:30px">Name</div>
+                </div>
+                <div class="ui-block-b">
+                    <div class="ui-bar ui-bar-a" style="height:30px">Delete</div>
+                </div>
             </div>
-            <div id="availableDevices">
-                <h3>Devices</h3>
-                {% if devices %}
-                    <div id="allowDeviceControl" data-role="fieldcontain">
-                        <fieldset data-role="controlgroup">
-                            <legend>Select devices for the user(s) to control:</legend>
-                            <input type="checkbox" name="device-0" id="device-0" class="custom" />
-			                <label for="device-0">All Devices</label>
-                            {% for device in devices %}
-                                <input type="checkbox" name="device-{{ device.id }}" id="device-{{ device.id }}" class="custom" />
-				                <label for="device-{{ device.id }}">{{ device.name }} ({{ device.location }})</label>
-                            {% endfor %}
-                        </fieldset>
+            {% for user in users %}
+            <div class="ui-grid-a" id="users_grid_row_{{ user.id }}">
+                <div class="ui-block-a">
+                    <div class="ui-bar ui-bar-a" style="height:30px">{{ user.username }} ({{ user.first_name }} {{ user.last_name }})</div>
+                </div>
+                <div class="ui-block-b">
+                    <div class="ui-bar ui-bar-a" style="height:30px">
+                        <form method="POST" action="">{% csrf_token %}
+                            <input type="submit" name="deleteUser" value="Delete" onclick="this.value='{{ user.id }}';this.form.post()"/>
+                        </form>
                     </div>
-                    <a href="#" data-role="button" onclick="saveUserDevicePermissions()">Save</a>
-                {% else %}
-                    <h3>Currently there are no devices.</h3>
-                {% endif %}
+                </div>
             </div>
+            {% endfor %}
         </div>
         <div id="addUser">
             <h2>Add New User</h2>

@@ -4,13 +4,6 @@ from django import forms
 from django.forms.widgets import TextInput, PasswordInput
 from django.contrib.auth.models import User
 
-
-class UserForm(ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput())
-    class Meta:
-        model = User
-        fields = ('username','email','password', 'first_name', 'last_name')
-
 ################
 # Webmote Device
 ################
@@ -166,6 +159,24 @@ class IR_CommandsForm(CommandsForm):
         model = IR_Commands
         exclude = ('device',)
 
+# Some left over code
+def IRSend(command):
+    try:
+        # this should pull the location of the xbee from the db
+        ser = serial.Serial('/dev/ttyACM0', 9600)
+        ser.write(command)
+        return 1
+    except:
+        determineIRPort()
+        return False
+
+
+# This should get called on setup or if there are communication problems. maybe set the value in the db?
+def determineIRPort():
+    return '/dev/ttyUSB0'
+
+
+
 ################
 # IR Database (Alex Z)
 ################
@@ -189,3 +200,21 @@ class IR_Database(models.Model):
         f = open(file, 'r')
         for line in f:
             parseFromLine(self, line)
+
+################
+# Misc.
+################
+
+class UserForm(ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput())
+    class Meta:
+        model = User
+        fields = ('username','email','password', 'first_name', 'last_name')
+
+class UserPermissions(models.Model):
+    user = models.ForeignKey(User)
+    device = models.ForeignKey(Devices)
+
+################
+# X10
+################
