@@ -181,30 +181,20 @@ def determineIRPort():
 # IR Database (Alex Z)
 ################
     
-class IR_Database(models.Model):
-    entries = models.ManyToManyField("IR_Database_Entry")
-    
-    def parseFromLine(self, line):
-        values = line.strip().split(',')
-		newEntry = IR_Database_Entry()
-        manufacturer = newEntry.values[0]
-        model = newEntry.values[1]
-        command = newEntry.values[2]
-        normalized_command = newEntry.values[3]
-        code = newEntry.values[4]
-		entries.append(newEntry)
-
-    def parseFromFile(self, file):
-        f = open(file, 'r')
-        for line in f:
-            parseFromLine(self, line)
-
 class IR_Database_Entry(models.Model):
 	manufacturer = models.CharField(max_length=100)
     model = models.CharField(max_length=100)
     command = models.CharField(max_length=100)
     normalized_command = models.CharField(max_length=100)
     code = models.CharField(max_length=1000)
+	
+	def parseFromLine(self, line):
+        values = line.strip().split(',')
+        this.manufacturer = newEntry.values[0]
+        this.model = newEntry.values[1]
+        this.command = newEntry.values[2]
+        this.normalized_command = newEntry.values[3]
+        this.code = newEntry.values[4]
 			
 ################
 # Misc.
