@@ -181,14 +181,21 @@ def determineIRPort():
 # IR Database (Alex Z)
 ################
     
-class IR_Database(models.Model):
-    manufacturer = models.CharField(max_length=100)
+class IR_Database_Entry(models.Model):
+	manufacturer = models.CharField(max_length=100)
     model = models.CharField(max_length=100)
     command = models.CharField(max_length=100)
     normalized_command = models.CharField(max_length=100)
     code = models.CharField(max_length=1000)
-
-
+	
+	def parseFromLine(self, line):
+        values = line.strip().split(',')
+        this.manufacturer = newEntry.values[0]
+        this.model = newEntry.values[1]
+        this.command = newEntry.values[2]
+        this.normalized_command = newEntry.values[3]
+        this.code = newEntry.values[4]
+			
 ################
 # Misc.
 ################
@@ -206,6 +213,3 @@ class UserPermissions(models.Model):
 ################
 # X10
 ################
-
-
-
