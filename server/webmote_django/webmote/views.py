@@ -35,15 +35,9 @@ def logout_view(request):
     return redirect('/')
 
 @login_required
-def runCommand(request, deviceNum="1", command="0"):
-    device = Devices.objects.filter(id=int(deviceNum))[0].getSubclassInstance()
-    context = {}    
-    if not device.runCommand(command):
-        context['error'] = "Command Failed to run"
-    if 'error' not in context and hasattr(device, 'state'):
-        device.state = int(command)
-        device.save()
-    return render_to_response('index.html')
+def runCommandView(request, deviceNum="1", command="0"):
+    context = runCommand(deviceNum, command)
+    return render_to_response('index.html', context, context_instance=RequestContext(request))
 
 @login_required
 def devices(request, room="all"):
@@ -76,7 +70,10 @@ def custom_screen(request, screen_name = "default"):
 @login_required
 def macro(request, macroID="0"):
     context = {}
-    return render_to_response('index.html', context, context_instance=RequestContext(request))
+    macroName = Macros.objects.filter(id=macroID)[0].macroName
+    context['macroName'] = macroName
+    context['macros'] = Macros.objects.filter(macroName=macroName).order_by('id')
+    return render_to_response('macro.html', context, context_instance=RequestContext(request))
 
 @login_required
 def macros(request):
@@ -90,7 +87,7 @@ def macros(request):
         if 'deleteMacro' in request.POST:
             Macros.objects.filter(macroName=request.POST['deleteMacro'], user=request.user).delete()
         if 'runMacro' in request.POST:
-            runMacro(request)
+            runMacro(request.POST['runMacro'], request.user)
     unique = []
     uniqueNames = []
     for macro in Macros.objects.filter(user=request.user):
@@ -99,8 +96,6 @@ def macros(request):
             uniqueNames.append(macro.macroName)
     context['macros'] = unique
     return render_to_response('macros.html', context, context_instance=RequestContext(request))
-
-
 
 @login_required
 def profiles(request):
@@ -243,8 +238,24 @@ def setUserPermissions(permissions):
             UserPermissions(user=user, device=device).save()
     return True
 
-def runMacro():
-    print "run macro not finished"
+def runCommand(deviceNum, command):
+    context = {}
+    devices = Devices.objects.filter(id=int(deviceNum))
+    if devices:
+        device = devices[0].getSubclassInstance()
+        if not device.runCommand(command):
+            context['error'] = "Command Failed to run"
+        if 'error' not in context and hasattr(device, 'state'):
+            device.state = int(command)
+            device.save()
+    else:
+        context['error'] = "Command Failed to run"
+    return context
+
+def runMacro(macroName, user):
+    for macro in Macros.objects.filter(user=user, macroName=macroName,).order_by('id'):
+        if macro.device:
+            runCommand(macro.device.id, macro.command.id)
 
 def loadProfile(userID, profileName, request):
     for abstractDevice in getAllowedDevices(userID):
@@ -252,12 +263,12 @@ def loadProfile(userID, profileName, request):
         if hasattr(device, 'state'):
             if profileName == "All On":
                 print "All On"
-                runCommand(request, device.id, 100)
+                runCommand(device.id, 100)
             if profileName == "All Off":
                 print "All Off"
-                runCommand(request, device.id, 0)
+                runCommand(device.id, 0)
             else:
                 profile = Profiles.objects.filter(profileName=profileName, device=abstractDevice)
                 if profile:
-                    runCommand(request, device.id, profile[0].deviceState)
+                    runCommand(device.id, profile[0].deviceState)
 

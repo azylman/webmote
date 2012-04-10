@@ -43,7 +43,7 @@ Macros - Home Control
                     <div class="ui-bar ui-bar-a" style="height:30px">
 <!--                        Would prefer that this was done via Ajax but we can wait for later-->
                         <form method="post" action="">{% csrf_token %}
-                            <input type="submit" name="runMacro" value="Run" onclick="this.value='{{ macro.id }}';this.form.post()"/>
+                            <input type="submit" name="runMacro" value="Run" onclick="this.value='{{ macro.macroName }}';this.form.post()"/>
                         </form>
                     </div>
                 </div>

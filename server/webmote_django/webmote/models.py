@@ -212,8 +212,12 @@ class Profiles(models.Model):
 class Macros(models.Model):
     macroName = models.CharField(max_length=100)
     command = models.ForeignKey(Commands, null=True)
-    device = models.ForeignKey(Devices, null=True)
+    macro = models.ForeignKey('self', null=True)
+    profile = models.ForeignKey(Profiles, null=True)
     user = models.ForeignKey(User)
+    def runnable(self):
+        return self.command or self.macro or self.profile
+
 
 ################
 # X10

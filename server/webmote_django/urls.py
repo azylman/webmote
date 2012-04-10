@@ -35,7 +35,7 @@ urlpatterns = patterns('',
     ),
 
     # Pages
-    url(r'^run_command/(?P<deviceNum>\d+)/(?P<command>\d+)/$', 'webmote_django.webmote.views.runCommand'),
+    url(r'^run_command/(?P<deviceNum>\d+)/(?P<command>\d+)/$', 'webmote_django.webmote.views.runCommandView'),
     url(r'^rooms/$', 'webmote_django.webmote.views.rooms'),
     url(r'^profiles/$', 'webmote_django.webmote.views.profiles'),
     url(r'^macros/$', 'webmote_django.webmote.views.macros'),

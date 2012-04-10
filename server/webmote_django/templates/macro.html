@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% comment %}
+{% extends "jqm/simple.html" %}
+{% endcomment %}
+
+{% block title %}
+    Webmote - {{ macroName }}
+{% endblock %}
+
+{% block page_title %}
+    Webmote - {{ macroName }}
+{% endblock %}
+{% block content %}
+<div data-role="content">	
+    <div id="modifyMacro">
+    <h2>Edit: {{ macroName }}</h2>
+    <h3>Add a device/command, another macro, or a profile.</h3>
+    {% for macro in macros %}
+        {% if macro.runnable %}
+            wtf<br>
+        {% endif %}
+    {% endfor %}
+    </div>
+</div>
+{% endblock %}
