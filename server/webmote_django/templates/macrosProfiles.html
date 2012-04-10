@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load url from future %}
+
+{% block title %}
+Macros/Profiles - Home Control
+{% endblock %}
+{% block page_title %}
+    Macros/Profiles
+{% endblock %}
+
+{% block content %}
+    <div id="content">
+        <div id="macros">
+
+        </div>
+        <div id="profiles">
+            <h2>Profiles</h2>
+            <h3>Set every device's state all at once by selecting a profile.</h3>
+<!--            Headers-->
+            <div class="ui-grid-b" id="profiles_grid_fields">
+                <div class="ui-block-a">
+                    <div class="ui-bar ui-bar-a" style="height:30px">Name</div>
+                </div>
+                <div class="ui-block-b">
+                    <div class="ui-bar ui-bar-a" style="height:30px">Set Profile</div>
+                </div>
+                <div class="ui-block-c">
+                    <div class="ui-bar ui-bar-a" style="height:30px">Delete</div>
+                </div>
+            </div>
+
+<!--            All Off-->
+            <div class="ui-grid-b" id=profiles_grid_row_All_Off">
+                <div class="ui-block-a">
+                    <div class="ui-bar ui-bar-a" style="height:30px">All Off</div>
+                </div>
+                <div class="ui-block-b">
+                    <div class="ui-bar ui-bar-a" style="height:30px">
+<!--                        Would prefer that this was done via Ajax-->
+                        <form method="post" action="">{% csrf_token %}
+                            <input type="submit" name="loadProfile" value="Set" onclick="this.value='All Off';this.form.post()"/>
+                        </form>
+                    </div>
+                </div>
+                <div class="ui-block-c">
+                    <div class="ui-bar ui-bar-a" style="height:30px">
+                    </div>
+                </div>
+            </div>
+
+<!--            All On-->
+            <div class="ui-grid-b" id=profiles_grid_row_All_On">
+                <div class="ui-block-a">
+                    <div class="ui-bar ui-bar-a" style="height:30px">All On</div>
+                </div>
+                <div class="ui-block-b">
+                    <div class="ui-bar ui-bar-a" style="height:30px">
+<!--                        Would prefer that this was done via Ajax-->
+                        <form method="post" action="">{% csrf_token %}
+                            <input type="submit" name="loadProfile" value="Set" onclick="this.value='All On';this.form.post()"/>
+                        </form>
+                    </div>
+                </div>
+                <div class="ui-block-c">
+                    <div class="ui-bar ui-bar-a" style="height:30px">
+                    </div>
+                </div>
+            </div>
+
+
+            {% for profile in profiles %}
+            <div class="ui-grid-b" id=profiles_grid_row_{{ profile.id }}">
+                <div class="ui-block-a">
+                    <div class="ui-bar ui-bar-a" style="height:30px">{{ profile.profileName }}</div>
+                </div>
+                <div class="ui-block-b">
+                    <div class="ui-bar ui-bar-a" style="height:30px">
+<!--                        Would prefer that this was done via Ajax-->
+                        <form method="post" action="">{% csrf_token %}
+                            <input type="submit" name="loadProfile" value="Set" onclick="this.value='{{ profile.profileName }}';this.form.post()"/>
+                        </form>
+                    </div>
+                </div>
+                <div class="ui-block-c">
+                    <div class="ui-bar ui-bar-a" style="height:30px">
+                        <form method="post" action="">{% csrf_token %}
+                            <input type="submit" name="deleteProfile" value="Delete" onclick="this.value='{{ profile.profileName }}';this.form.post()"/>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            <div id="saveProfile">
+                <h3>Save Current State as New Profile</h3>
+                <form name="saveProfile" method="POST">{% csrf_token %}
+                    <input name="profileName" type="text" placeholder="i.e. Morning, Evening, etc.">
+                    <input name="saveProfile" type="submit" value="Save">
+                </form>
+            </div>
+        <div>
+    </div>
+{% endblock %}

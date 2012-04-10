@@ -46,6 +46,74 @@ def runCommand(request, deviceNum="1", command="0"):
     return render_to_response('index.html')
 
 @login_required
+def devices(request, room="all"):
+    context = {}
+    context['room'] = room
+    if room == "all":
+        context['devices'] = getAllowedDevices(request.user.id)
+    else:
+        context['devices'] = []
+        for device in getAllowedDevices(request.user.id):
+            if device.location == room:
+                context['devices'].append(device)
+    return render_to_response('devices_new.html', context, context_instance=RequestContext(request))
+
+@login_required
+def rooms(request):
+    context = {}
+    context['rooms'] = []
+    for device in getAllowedDevices(request.user.id):
+        if not device.location in context['rooms']:
+            context['rooms'].append(device.location)
+    return render_to_response('rooms.html', context, context_instance=RequestContext(request))
+
+@login_required
+def custom_screen(request, screen_name = "default"):
+    context = {}
+    context['commands'] = Commands.objects.filter(id = Custom_Screens.objects.filter(name = screen_name))
+    return render_to_response('custom_screen.html', context, context_instance=RequestContext(request))
+
+
+@login_required
+def macrosProfiles(request):
+    context = {}
+    if request.method == 'POST':
+        if 'saveProfile' in request.POST:
+            for abstractDevice in getAllowedDevices(request.user.id):
+                device = abstractDevice.getSubclassInstance()
+                if hasattr(device, 'state'):
+                    profile = Profiles(user=request.user, profileName=request.POST['profileName'], device=device, deviceState=device.state)
+                    profile.save()
+        if 'deleteProfile' in request.POST:
+            Profiles.objects.filter(profileName=request.POST['deleteProfile'], user=request.user).delete()
+        if 'loadProfile' in request.POST:
+            for abstractDevice in getAllowedDevices(request.user.id):
+                device = abstractDevice.getSubclassInstance()
+                if hasattr(device, 'state'):
+                    if request.POST['loadProfile'] == "All On":
+                        print "All On"
+                        runCommand(request, device.id, 100)
+                    if request.POST['loadProfile'] == "All Off":
+                        print "All Off"
+                        runCommand(request, device.id, 0)
+                    else:
+                        profile = Profiles.objects.filter(profileName=request.POST['loadProfile'], device=abstractDevice)[0]
+                        runCommand(request, device.id, profile.deviceState)
+
+    unique = []
+    uniqueNames = []
+    for profile in Profiles.objects.filter(user=request.user):
+        if not profile.profileName in uniqueNames:
+            unique.append(profile)
+            uniqueNames.append(profile.profileName)
+    context['profiles'] = unique
+    return render_to_response('macrosProfiles.html', context, context_instance=RequestContext(request))
+
+################
+# Admin Views
+################
+
+@login_required
 def userPermissions(request):
     if request.user.is_superuser:
         if request.method == 'POST':
@@ -83,20 +151,6 @@ def users(request, userID = "0"):
                 User.objects.filter(id=request.POST['deleteUser']).delete()
         return render_to_response('users.html', context, context_instance=RequestContext(request))
 
-@login_required
-def devices(request, room="all"):
-    context = {}
-    context['room'] = room
-    if room == "all":
-        context['devices'] = getAllowedDevices(request.user.id)
-    else:
-        context['devices'] = []
-        for device in getAllowedDevices(request.user.id):
-            if device.location == room:
-                context['devices'].append(device)
-    return render_to_response('devices_new.html', context, context_instance=RequestContext(request))
-
-    
 @login_required
 def setup(request):
     if request.user.is_superuser:
@@ -148,22 +202,6 @@ def device(request, num="1"):
         context['commands'] = device.commands_set.all()
         context['commandForm'] = commandForm
         return render_to_response('device.html', context, context_instance=RequestContext(request))
-
-@login_required
-def rooms(request):
-    context = {}
-    context['rooms'] = []
-    for device in getAllowedDevices(request.user.id):
-        if not device.location in context['rooms']:
-            context['rooms'].append(device.location)
-    return render_to_response('rooms.html', context, context_instance=RequestContext(request))
-
-@login_required
-def custom_screen(request, screen_name = "default"):
-    context = {}
-    context['commands'] = Commands.objects.filter(id = Custom_Screens.objects.filter(name = screen_name))
-    return render_to_response('custom_screen.html', context, context_instance=RequestContext(request))
-
 
 ##################
 # Helper Functions 

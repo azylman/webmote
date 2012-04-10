@@ -123,13 +123,6 @@ class X10_CommandsForm(CommandsForm):
         model = X10_Commands
         exclude = ('state', 'device')
 
-class X10_Profiles(models.Model):
-    profileName = models.CharField(max_length=100)
-    deviceID = models.IntegerField()
-    deviceState = models.IntegerField()
-
-
-
 ################
 # IR
 ################
@@ -180,22 +173,22 @@ def determineIRPort():
 ################
 # IR Database (Alex Z)
 ################
-    
+
 class IR_Database_Entry(models.Model):
-	manufacturer = models.CharField(max_length=100)
+    manufacturer = models.CharField(max_length=100)
     model = models.CharField(max_length=100)
     command = models.CharField(max_length=100)
     normalized_command = models.CharField(max_length=100)
     code = models.CharField(max_length=1000)
-	
-	def parseFromLine(self, line):
+    
+    def parseFromLine(self, line):
         values = line.strip().split(',')
         this.manufacturer = newEntry.values[0]
         this.model = newEntry.values[1]
         this.command = newEntry.values[2]
         this.normalized_command = newEntry.values[3]
         this.code = newEntry.values[4]
-			
+
 ################
 # Misc.
 ################
@@ -209,6 +202,12 @@ class UserForm(ModelForm):
 class UserPermissions(models.Model):
     user = models.ForeignKey(User)
     device = models.ForeignKey(Devices)
+
+class Profiles(models.Model):
+    profileName = models.CharField(max_length=100)
+    user = models.ForeignKey(User)
+    device = models.ForeignKey(Devices)
+    deviceState = models.IntegerField()
 
 ################
 # X10
