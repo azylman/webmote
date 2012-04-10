@@ -226,36 +226,3 @@ def setUserPermissions(permissions):
             UserPermissions(user=user, device=device).save()
     return True
 
-
-#@login_required
-#def devices(request):
-#    context = {}
-#    for deviceType in DEVICE_TYPES:
-#        context[deviceType[0]] = Devices.objects.filter(type = deviceType[0])
-##    context['devices_onoff'] = Devices.objects.filter(type = 'On-Off Light')
-##    context['devices_dimmable'] = Devices.objects.filter(type = 'Dimmable Light')
-#    if request.method == 'POST':
-#        if 'saveProfile' in request.POST:
-#            Profiles.objects.filter(profileName=request.POST['profileName']).delete()
-#            for device in Devices.objects.all():
-#                profile = Profiles(profileName=request.POST['profileName'], deviceID=device.id, deviceState=device.state)
-#                profile.save()
-#        if 'deleteProfile' in request.POST:
-#            Profiles.objects.filter(profileName=request.POST['deleteProfile']).delete()
-#        if 'loadProfile' in request.POST:
-#            if request.POST['loadProfile'] == "All On":
-#                Devices.objects.all().update(state=100)
-#            if request.POST['loadProfile'] == "All Off":
-#                Devices.objects.all().update(state=0)
-#            else:
-#                for profile in Profiles.objects.filter(profileName=request.POST['loadProfile']):
-#                    device = Devices.objects.filter(id=profile.deviceID)[0]
-#                    device.state = profile.deviceState
-#                    device.save()
-#    unique = []
-#    for profile in Profiles.objects.all():
-#        if not profile.profileName in unique:
-#            unique.append(profile.profileName)
-#    context['profiles'] = unique
-#    return render_to_response('devices.html', context, context_instance=RequestContext(request))
-
