@@ -209,6 +209,12 @@ class Profiles(models.Model):
     device = models.ForeignKey(Devices)
     deviceState = models.IntegerField()
 
+class Macros(models.Model):
+    macroName = models.CharField(max_length=100)
+    command = models.ForeignKey(Commands, null=True)
+    device = models.ForeignKey(Devices, null=True)
+    user = models.ForeignKey(User)
+
 ################
 # X10
 ################

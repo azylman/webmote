@@ -73,9 +73,37 @@ def custom_screen(request, screen_name = "default"):
     context['commands'] = Commands.objects.filter(id = Custom_Screens.objects.filter(name = screen_name))
     return render_to_response('custom_screen.html', context, context_instance=RequestContext(request))
 
+@login_required
+def macro(request, macroID="0"):
+    context = {}
+    return render_to_response('index.html', context, context_instance=RequestContext(request))
 
 @login_required
-def macrosProfiles(request):
+def macros(request):
+    context = {}
+    if request.method == 'POST':
+        if 'saveMacro' in request.POST:
+            newMacro = Macros(macroName=request.POST['macroName'], user=request.user)
+            newMacro.save()
+            #return redirect('/macro/' + str(newMacro.id) + '/')
+            # this redirection behavior would be great but jqm cant handle it :-(
+        if 'deleteMacro' in request.POST:
+            Macros.objects.filter(macroName=request.POST['deleteMacro'], user=request.user).delete()
+        if 'runMacro' in request.POST:
+            runMacro(request)
+    unique = []
+    uniqueNames = []
+    for macro in Macros.objects.filter(user=request.user):
+        if not macro.macroName in uniqueNames:
+            unique.append(macro)
+            uniqueNames.append(macro.macroName)
+    context['macros'] = unique
+    return render_to_response('macros.html', context, context_instance=RequestContext(request))
+
+
+
+@login_required
+def profiles(request):
     context = {}
     if request.method == 'POST':
         if 'saveProfile' in request.POST:
@@ -87,18 +115,7 @@ def macrosProfiles(request):
         if 'deleteProfile' in request.POST:
             Profiles.objects.filter(profileName=request.POST['deleteProfile'], user=request.user).delete()
         if 'loadProfile' in request.POST:
-            for abstractDevice in getAllowedDevices(request.user.id):
-                device = abstractDevice.getSubclassInstance()
-                if hasattr(device, 'state'):
-                    if request.POST['loadProfile'] == "All On":
-                        print "All On"
-                        runCommand(request, device.id, 100)
-                    if request.POST['loadProfile'] == "All Off":
-                        print "All Off"
-                        runCommand(request, device.id, 0)
-                    else:
-                        profile = Profiles.objects.filter(profileName=request.POST['loadProfile'], device=abstractDevice)[0]
-                        runCommand(request, device.id, profile.deviceState)
+            loadProfile(request.user.id, request.POST['loadProfile'], request)
 
     unique = []
     uniqueNames = []
@@ -107,7 +124,7 @@ def macrosProfiles(request):
             unique.append(profile)
             uniqueNames.append(profile.profileName)
     context['profiles'] = unique
-    return render_to_response('macrosProfiles.html', context, context_instance=RequestContext(request))
+    return render_to_response('profiles.html', context, context_instance=RequestContext(request))
 
 ################
 # Admin Views
@@ -225,4 +242,22 @@ def setUserPermissions(permissions):
             user = User.objects.filter(id=int(userID))[0]
             UserPermissions(user=user, device=device).save()
     return True
+
+def runMacro():
+    print "run macro not finished"
+
+def loadProfile(userID, profileName, request):
+    for abstractDevice in getAllowedDevices(userID):
+        device = abstractDevice.getSubclassInstance()
+        if hasattr(device, 'state'):
+            if profileName == "All On":
+                print "All On"
+                runCommand(request, device.id, 100)
+            if profileName == "All Off":
+                print "All Off"
+                runCommand(request, device.id, 0)
+            else:
+                profile = Profiles.objects.filter(profileName=profileName, device=abstractDevice)
+                if profile:
+                    runCommand(request, device.id, profile[0].deviceState)
 
