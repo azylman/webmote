@@ -35,6 +35,37 @@ def logout_view(request):
     return redirect('/')
 
 @login_required
+def getActionInfo(request):
+    data = simplejson.loads(request.raw_post_data)
+    if data[1] == 'device':
+        deviceNames = []
+        for device in getAllowedDevices(request.user.id):
+            deviceNames.append(device.name)
+        return HttpResponse(simplejson.dumps(deviceNames), mimetype='application/javascript')
+    if data[1] == 'commands':
+        commandNames = []
+        device = Devices.objects.filter(name=data[2])[0]
+        for command in Commands.objects.filter(device=device):
+            commandNames.append(command.name)
+            return HttpResponse(simplejson.dumps(commandNames), mimetype='application/javascript')
+    if data[1] == 'profile':
+        profileNames = []
+        profileNames.append('All On')
+        profileNames.append('All Off')
+        for profile in Profiles.objects.filter(user=request.user):
+            if not profile.profileName in profileNames:
+                profileNames.append(profile.profileName)
+        return HttpResponse(simplejson.dumps(profileNames), mimetype='application/javascript')
+    if data[1] == 'macro':
+        macroNames = []
+        for macro in Macros.objects.filter(user=request.user):
+            if not macro.macroName in macroNames and not macro.macroName in data[0]:
+                macroNames.append(macro.macroName)
+        return HttpResponse(simplejson.dumps(macroNames), mimetype='application/javascript')
+    return HttpResponse(simplejson.dumps(''), mimetype='application/javascript')
+
+
+@login_required
 def runCommandView(request, deviceNum="1", command="0"):
     context = runCommand(deviceNum, command)
     return render_to_response('index.html', context, context_instance=RequestContext(request))
@@ -70,9 +101,34 @@ def custom_screen(request, screen_name = "default"):
 @login_required
 def macro(request, macroID="0"):
     context = {}
-    macroName = Macros.objects.filter(id=macroID)[0].macroName
-    context['macroName'] = macroName
-    context['macros'] = Macros.objects.filter(macroName=macroName).order_by('id')
+    context['macroName'] = ''
+    if request.method == 'POST':
+        data = simplejson.loads(request.raw_post_data)
+        data[0] = data[0].replace('\n', '')
+        context['macroName'] = data[0]
+        if data[1] == 'device':
+            device = Devices.objects.filter(name=data[2])[0]
+            command = Commands.objects.filter(name=data[3], device=device)[0]
+            newMacroAction = Macros(macroName=data[0], command=command, user=request.user)
+            newMacroAction.save()
+        if data[1] == 'profile':
+            if data[2] == 'All On' or data[2] == 'All Off':
+                print "This is not figure out yet!!!!!!!!!!!!!!!!!!!!!"
+            else:
+                profile = Profiles.objects.filter(profileName=data[2])[0]
+                newMacroAction = Macros(macroName=data[0], profile=profile, user=request.user)
+                newMacroAction.save()
+        if data[1] == 'macro':
+            macro = Macros.objects.filter(macroName=data[2])[0]
+            newMacroAction = Macros(macroName=data[0], macro=macro, user=request.user)
+            newMacroAction.save()
+    else:
+        context['macroName'] = Macros.objects.filter(id=macroID)[0].macroName
+    print len(context['macroName'])
+    for letter in context['macroName']:
+        print unicode(letter)
+    context['macros'] = Macros.objects.filter(macroName=context['macroName']).order_by('id')
+    print len(context['macros'])
     return render_to_response('macro.html', context, context_instance=RequestContext(request))
 
 @login_required

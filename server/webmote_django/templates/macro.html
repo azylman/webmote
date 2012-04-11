@@ -11,15 +11,62 @@
     Webmote - {{ macroName }}
 {% endblock %}
 {% block content %}
+<div id="macroName" style="display:none">
+{{ macroName }}
+</div>
+
 <div data-role="content">	
     <div id="modifyMacro">
-    <h2>Edit: {{ macroName }}</h2>
-    <h3>Add a device/command, another macro, or a profile.</h3>
-    {% for macro in macros %}
-        {% if macro.runnable %}
-            wtf<br>
-        {% endif %}
-    {% endfor %}
+        <h2>{{ macroName }}</h2>
+        <div class="ui-grid-a" id="macros_grid_fields">
+            <div class="ui-block-a">
+                <div class="ui-bar ui-bar-a" style="height:30px">Action</div>
+            </div>
+            <div class="ui-block-b">
+                <div class="ui-bar ui-bar-a" style="height:30px">Delete</div>
+            </div>
+        </div>
+        {% for macro in macros %}
+            {% if macro.runnable %}
+                <div class="ui-grid-a" id=macros_grid_row_{{ macros.id }}">
+                    <div class="ui-block-a">
+                        <div class="ui-bar ui-bar-a" style="height:30px">{{ macro.macroName }}
+
+                        </div>
+                    </div>
+                    <div class="ui-block-b">
+                        <div class="ui-bar ui-bar-a" style="height:30px">
+                            <form method="post" action="">{% csrf_token %}
+                                <input type="submit" name="deleteMacro" value="Delete" onclick="this.value='{{ macro.macroName }}';this.form.post()"/>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+        <h2>Add a new action to the macro.</h2>
+        <h3>Select a new action:</h3>
+        <div id="newMacroAction">
+            <select id="actionType">
+                <option value="----">----</option>
+                <option value="device">Run Device Command</option>
+                <option value="profile">Load Profile</option>
+                <option value="macro">Run Macro</option>
+            </select>
+            <div id="selectDeviceProfileMacro" style="display:none">
+                <select id="deviceProfileMacro">
+
+                </select>
+                <div id="selectDeviceCommand" style="display:none">
+                    <select id="deviceCommand">
+
+                    </select>
+                </div>
+                <div id="newActionSave" style="display:none">
+                    <a href="#" data-role="button" onclick="saveNewAction()">Save</a>
+                <div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

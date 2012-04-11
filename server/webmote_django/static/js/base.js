@@ -97,7 +97,76 @@ $(document).ready(function() {
                     }
                 }
             });
+
+            $('#actionType').change(function() {
+                $('#selectDeviceProfileMacro').fadeOut();
+                $('#selectDeviceCommand').fadeOut();
+                $('#newActionSave').fadeOut();
+                var serverInfo = [$('#macroName').text() ,$(this).find("option:selected").val()];
+                var options = getActionInfo(serverInfo);
+                var htmlOptions = '<option value="----">----</option>';
+                for (i = 0; i < options.length; i++) {
+                    htmlOptions += '<option value="' + options[i] + '">' + options[i] + '</options>';
+                }
+                $('select#deviceProfileMacro').html(htmlOptions).selectmenu('refresh', true);
+                if (serverInfo[1] != '----') {
+                    $('#selectDeviceProfileMacro').fadeIn();
+                }
+            });
+
+            $('select#deviceProfileMacro').change(function() {
+                $('#selectDeviceCommand').fadeOut();
+                if ($('#actionType').find("option:selected").val() == 'device') {
+                    var serverInfo = [$('#macroName').text() , 'commands', $('select#deviceProfileMacro').find("option:selected").val()];
+                    var options = getActionInfo(serverInfo);
+                    var htmlOptions = '<option value="----">----</option>';
+                    for (i = 0; i < options.length; i++) {
+                        htmlOptions += '<option value="' + options[i] + '">' + options[i] + '</options>';
+                    }
+                    $('select#deviceCommand').html(htmlOptions).selectmenu('refresh', true);
+                    $('#selectDeviceCommand').fadeIn();
+                    $('#newActionSave').fadeOut();
+                } else {
+                    if ($('#deviceProfileMacro').find("option:selected").val() != '----') {
+                        $('#newActionSave').fadeIn();
+                    } else {
+                        $('#newActionSave').fadeOut();
+                    }
+                }
+            });
+
+            $('select#deviceCommand').change(function() {
+                if ($('#deviceCommand').find("option:selected").val() == '----') {
+                    $('#newActionSave').fadeOut();
+                } else {
+                    $('#newActionSave').fadeIn();
+                }
+            });
         });
+
+        function saveNewAction() {
+            $.mobile.loadingMessage = 'Updating Macro';
+            $.mobile.showPageLoadingMsg();
+            // Post this actionType
+            var data = [$('#macroName').text(), 
+                        $('#actionType').find("option:selected").val(), 
+                        $('#deviceProfileMacro').find("option:selected").val(),
+                        $('#deviceCommand').find("option:selected").val()];
+            
+            // Post this data to backend
+            $.ajax({
+                url: '/macro/',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(data),
+                dataType: 'text',
+                success: function(result) {
+                    $.mobile.hidePageLoadingMsg();
+                }
+            });
+
+            alert('not finished implemented saveNewAction()');
+        }
 
         function getSelectedProfile() {
             return $('#selectProfile option:selected')[0].value;
@@ -107,6 +176,19 @@ $(document).ready(function() {
             $.ajax({
                 url : url,
             });
+        }
+
+        function getActionInfo(data) {
+            return $.parseJSON( 
+                        $.ajax({
+                            url: '/get_action_info/',
+                            async: false,
+                            type: 'POST',
+                            contentType: 'application/json; charset=utf-8',
+                            data: JSON.stringify(data),
+                            dataType: 'text',
+                            success: function(returned) {}
+                        }).responseText);
         }
 
         function savePermissions() {
