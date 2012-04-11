@@ -164,7 +164,6 @@ $(document).ready(function() {
                     $.mobile.hidePageLoadingMsg();
                 }
             });
-
             alert('not finished implemented saveNewAction()');
         }
 
