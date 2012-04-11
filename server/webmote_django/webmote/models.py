@@ -217,7 +217,14 @@ class Macros(models.Model):
     user = models.ForeignKey(User)
     def runnable(self):
         return self.command or self.macro or self.profile
-
+    def getActionName(self):
+        if self.runnable:
+            if self.command:
+                return self.command.device.name + ' - ' + self.command.name
+            if self.macro:
+                return self.macro.macroNames
+            if self.profile:
+                return self.profile.profileName
 
 ################
 # X10

@@ -124,11 +124,7 @@ def macro(request, macroID="0"):
             newMacroAction.save()
     else:
         context['macroName'] = Macros.objects.filter(id=macroID)[0].macroName
-    print len(context['macroName'])
-    for letter in context['macroName']:
-        print unicode(letter)
     context['macros'] = Macros.objects.filter(macroName=context['macroName']).order_by('id')
-    print len(context['macros'])
     return render_to_response('macro.html', context, context_instance=RequestContext(request))
 
 @login_required
