@@ -290,9 +290,10 @@ def setUserPermissions(permissions):
             UserPermissions(user=user, device=device).save()
     return True
 
-def runCommand(deviceNum, command):
+def runCommand(deviceNum, commandNum):
     context = {}
     devices = Devices.objects.filter(id=int(deviceNum))
+    command = Commands.objects.filter(id=int(commandNum))[0]
     if devices:
         device = devices[0].getSubclassInstance()
         if not device.runCommand(command):

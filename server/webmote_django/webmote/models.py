@@ -4,6 +4,9 @@ from django import forms
 from django.forms.widgets import TextInput, PasswordInput
 from django.contrib.auth.models import User
 
+import serial, sys, os, binascii
+import struct
+
 ################
 # Webmote Device
 ################
@@ -87,9 +90,20 @@ X10_DEVICE_TYPES = (
 
 # Will probably put some popular models in
 X10_KNOWN_MODELS = (
-    ('Socket Rocket', 'abc123'),
-    ('Socket Rocket Dimmer', '123abc'),
+    ('LM15A', 'Socket Rocket (LM15A)'),
+    ('123abc', 'Socket Rocket Dimmer (123abc)'),
 )
+
+X10_DEFAULT_USER_COMMANDS = {}
+X10_DEFAULT_USER_COMMANDS['LM15A'] = ['On', 'Off']
+
+# These values are directly from the x10constants.h file from the arduino x10 library.
+HOUSE_CODES = {'A': 'B0110', 'B': 'B1110', 'C': 'B0010','D': 'B1010','E': 'B0001','F': 'B1001','G': 'B0101','H': 'B1101','I': 'B0111','J': 'B1111','K': 'B0011','L': 'B1011','M': 'B0000','N': 'B1000','O': 'B0100','P': 'B1100'}
+
+UNIT_CODES = {'1': 'B01100','2': 'B11100','3': 'B00100','4': 'B10100','5': 'B00010','6': 'B10010','7': 'B01010','8': 'B11010','9': 'B01110','10': 'B11110','11':'B00110','12': 'B10110','13': 'B00000','14': 'B10000','15': 'B01000','16': 'B11000'}
+
+COMMAND_CODES = {'ALL_UNITS_OFF': 'B00001','ALL_LIGHTS_ON': 'B00011','ON': 'B00101','OFF': 'B00111','DIM': 'B01001','BRIGHT': 'B01011','ALL_LIGHTS_OFF': 'B01101','EXTENDED_CODE': 'B01111','HAIL_REQUEST': 'B10001','HAIL_ACKNOWLEDGE': 'B10011','PRE_SET_DIM': 'B10101','EXTENDED_DATA': 'B11001','STATUS_ON': 'B11011','STATUS_OFF': 'B11101','STATUS_REQUEST': 'B11111'}
+
 
 class X10_Devices(Devices):
     house = models.CharField(max_length=1)
@@ -98,11 +112,27 @@ class X10_Devices(Devices):
     modelNumber = models.CharField(max_length=100, choices=X10_KNOWN_MODELS)
     state = models.IntegerField(default=0)
 
+    def save(self, *args, **kwargs):
+        super(X10_Devices, self).save(*args, **kwargs)
+        for modelNumber in X10_DEFAULT_USER_COMMANDS.keys():
+            if self.modelNumber in modelNumber:
+                for command in X10_DEFAULT_USER_COMMANDS[modelNumber]:
+                    if not len(X10_Commands.objects.filter(device=self, name=command)):
+                        newCommand = X10_Commands(name=command, device=self, code=123)
+                        newCommand.save()
+
     def runCommand(self, command):
-        print "called run command on X10"
-        if True:
+        try:
+            dev = findX10Modem()
+            ser = serial.Serial(dev, 9600)
+            message = chr(int(HOUSE_CODES[self.house].replace('B', '0b0000'), 2))
+            message += chr(int(UNIT_CODES[str(self.unit)].replace('B', '0b000'), 2))
+            message += chr(int(COMMAND_CODES[command.name.upper()].replace('B', '0b000'), 2))
+            ser.write(message)
+            print 'Ran \'' + command.name + '\' on \'' + command.device.name + '\' (X10)'
             return True
-        else:
+        except:
+            print 'FAILED to run \'' + command.name + '\' on \'' + command.device.name + '\' (X10)'
             return False
 
 class X10_DevicesForm(DevicesForm):
@@ -115,13 +145,17 @@ class X10_DevicesForm(DevicesForm):
 
 class X10_Commands(Commands):
    # modelNumber = models.ForeignKey(X10_Devices)
-    code = models.IntegerField()
+    code = models.IntegerField(null=True)
 
 class X10_CommandsForm(CommandsForm):
     code = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. 1110211'}))
     class Meta:
         model = X10_Commands
-        exclude = ('state', 'device')
+        exclude = ('state', 'device', 'code')
+
+def findX10Modem():
+    print "Found X10 modem at /dev/ttyUSB0 (BS at the moment)"
+    return '/dev/ttyUSB0'
 
 ################
 # IR
