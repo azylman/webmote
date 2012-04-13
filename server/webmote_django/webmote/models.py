@@ -256,10 +256,7 @@ class Macros(models.Model):
             if self.command:
                 return self.command.device.name + ' - ' + self.command.name
             if self.macro:
-                return self.macro.macroNames
+                return self.macro.macroName
             if self.profile:
                 return self.profile.profileName
 
-################
-# X10
-################

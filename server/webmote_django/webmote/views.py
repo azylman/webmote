@@ -47,7 +47,7 @@ def getActionInfo(request):
         device = Devices.objects.filter(name=data[2])[0]
         for command in Commands.objects.filter(device=device):
             commandNames.append(command.name)
-            return HttpResponse(simplejson.dumps(commandNames), mimetype='application/javascript')
+        return HttpResponse(simplejson.dumps(commandNames), mimetype='application/javascript')
     if data[1] == 'profile':
         profileNames = []
         profileNames.append('All On')
@@ -299,16 +299,21 @@ def runCommand(deviceNum, commandNum):
         if not device.runCommand(command):
             context['error'] = "Command Failed to run"
         if 'error' not in context and hasattr(device, 'state'):
-            device.state = int(command)
+            #device.state = getState()
+            device.state = 1
             device.save()
     else:
         context['error'] = "Command Failed to run"
     return context
 
 def runMacro(macroName, user):
-    for macro in Macros.objects.filter(user=user, macroName=macroName,).order_by('id'):
-        if macro.device:
-            runCommand(macro.device.id, macro.command.id)
+    for macro in Macros.objects.filter(user=user, macroName=macroName).order_by('id'):
+        if macro.runnable():
+            if macro.macro:
+                runMacro(macro.macro.macroName, user)
+            else:
+                runCommand(macro.command.device.id, macro.command.id)
+
 
 def loadProfile(userID, profileName, request):
     for abstractDevice in getAllowedDevices(userID):
