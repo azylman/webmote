@@ -134,8 +134,7 @@ def macros(request):
         if 'saveMacro' in request.POST:
             newMacro = Macros(macroName=request.POST['macroName'], user=request.user)
             newMacro.save()
-            #return redirect('/macro/' + str(newMacro.id) + '/')
-            # this redirection behavior would be great but jqm cant handle it :-(
+            return redirect('/macro/' + str(newMacro.id) + '/')
         if 'deleteMacro' in request.POST:
             Macros.objects.filter(macroName=request.POST['deleteMacro'], user=request.user).delete()
         if 'runMacro' in request.POST:
@@ -160,10 +159,11 @@ def profiles(request):
                     profile = Profiles(user=request.user, profileName=request.POST['profileName'], device=device, deviceState=device.state)
                     profile.save()
         if 'deleteProfile' in request.POST:
-            Profiles.objects.filter(profileName=request.POST['deleteProfile'], user=request.user).delete()
+            profileName = Profiles.objects.filter(id=request.POST['deleteProfile'])[0].profileName
+            Profiles.objects.filter(profileName=profileName, user=request.user).delete()
         if 'loadProfile' in request.POST:
-            loadProfile(request.user.id, request.POST['loadProfile'], request)
-
+            profileName = Profiles.objects.filter(id=request.POST['deleteProfile'])[0].profileName
+            loadProfile(request.user.id, profileName, request)
     unique = []
     uniqueNames = []
     for profile in Profiles.objects.filter(user=request.user):

@@ -77,14 +77,14 @@ Profiles - Home Control
                     <div class="ui-bar ui-bar-a" style="height:30px">
 <!--                        Would prefer that this was done via Ajax-->
                         <form method="post" action="">{% csrf_token %}
-                            <input type="submit" name="loadProfile" value="Set" onclick="this.value='{{ profile.profileName }}';this.form.post()"/>
+                            <input type="submit" name="loadProfile" value="Set" onclick="this.value='{{ profile.id }}';this.form.post()"/>
                         </form>
                     </div>
                 </div>
                 <div class="ui-block-c">
                     <div class="ui-bar ui-bar-a" style="height:30px">
                         <form method="post" action="">{% csrf_token %}
-                            <input type="submit" name="deleteProfile" value="Delete" onclick="this.value='{{ profile.profileName }}';this.form.post()"/>
+                            <input type="submit" name="deleteProfile" value="Delete" onclick="this.value='{{ profile.id }}';this.form.post()"/>
                         </form>
                     </div>
                 </div>
