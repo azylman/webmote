@@ -266,6 +266,26 @@ def device(request, num="1"):
         context['commands'] = device.commands_set.all()
         context['commandForm'] = commandForm
         return render_to_response('device.html', context, context_instance=RequestContext(request))
+		
+@login_required
+def db_admin(request, userID = "0"):
+    if request.user.is_superuser:
+        context = {}
+        context['uploadDbForm'] = UploadDatabaseForm()
+        if request.method == 'POST':
+            print >>sys.stderr, 'Page contains post data'
+            if 'uploadDb' in request.POST:
+                print >>sys.stderr, 'Page contains uploadDb form submission'
+                form = UploadDatabaseForm(request.POST, request.FILES)
+                print >>sys.stderr, 'Form is valid:', form.is_valid()
+                if form.is_valid():
+                    print >>sys.stderr, 'Page contains valid form'
+                    file = request.FILES['file']
+                    for line in file:
+                        newEntry = IR_Database_Entry()
+                        newEntry.parseFromLine(line)
+                        newEntry.save()
+        return render_to_response('db_admin.html', context, context_instance=RequestContext(request))
 
 ##################
 # Helper Functions 
@@ -329,4 +349,3 @@ def loadProfile(userID, profileName, request):
                 profile = Profiles.objects.filter(profileName=profileName, device=abstractDevice)
                 if profile:
                     runCommand(device.id, profile[0].deviceState)
-

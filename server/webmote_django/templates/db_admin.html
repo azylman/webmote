@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load url from future %}
+
+{% block title %}
+IR DB Admin - Home Control
+{% endblock %}
+{% block page_title %}
+    Users
+{% endblock %}
+
+{% block content %}
+    <div data-role="content">
+        <div id="uploadDb">
+            <h2>Upload IR Database</h2>
+            <form enctype="multipart/form-data" method="POST" action="">{% csrf_token %}
+                {{ uploadDbForm.as_table }}
+                <input type="submit" name="uploadDb" value="Upload" />
+            </form>
+        </div>
+    </div>
+{% endblock %}
