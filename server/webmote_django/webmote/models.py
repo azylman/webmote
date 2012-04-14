@@ -231,7 +231,10 @@ class UserForm(ModelForm):
     password = forms.CharField(widget=forms.PasswordInput())
     class Meta:
         model = User
-        fields = ('username','email','password', 'first_name', 'last_name')
+        fields = ('username', 'email', 'password', 'first_name', 'last_name')
+		
+class UploadDatabaseForm(forms.Form):
+    file = forms.FileField()
 
 class UserPermissions(models.Model):
     user = models.ForeignKey(User)

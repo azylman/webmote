@@ -53,6 +53,7 @@ urlpatterns = patterns('',
     url(r'^user_setup/$', 'webmote_django.webmote.views.setup'),
     url(r'^logout/$', 'webmote_django.webmote.views.logout_view'),
     url(r'^identification/$', 'webmote_django.webmote.views.identification'),
+	url(r'^db_admin/$', 'webmote_django.webmote.views.db_admin'),
    
 )
 
