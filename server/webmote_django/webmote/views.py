@@ -275,13 +275,9 @@ def db_admin(request, userID = "0"):
         context = {}
         context['uploadDbForm'] = UploadDatabaseForm()
         if request.method == 'POST':
-            print >>sys.stderr, 'Page contains post data'
             if 'uploadDb' in request.POST:
-                print >>sys.stderr, 'Page contains uploadDb form submission'
                 form = UploadDatabaseForm(request.POST, request.FILES)
-                print >>sys.stderr, 'Form is valid:', form.is_valid()
                 if form.is_valid():
-                    print >>sys.stderr, 'Page contains valid form'
                     file = request.FILES['file']
                     for line in file:
                         newEntry = IR_Database_Entry()
