@@ -110,12 +110,9 @@ def macro(request, macroID="0"):
             newMacroAction = Macros(macroName=data[0], command=command, user=request.user)
             newMacroAction.save()
         if data[1] == 'profile':
-            if data[2] == 'All On' or data[2] == 'All Off':
-                print "This is not figure out yet!!!!!!!!!!!!!!!!!!!!!"
-            else:
-                profile = Profiles.objects.filter(profileName=data[2])[0]
-                newMacroAction = Macros(macroName=data[0], profile=profile, user=request.user)
-                newMacroAction.save()
+            profile = Profiles.objects.filter(profileName=data[2])[0]
+            newMacroAction = Macros(macroName=data[0], profile=profile, user=request.user)
+            newMacroAction.save()
         if data[1] == 'macro':
             macro = Macros.objects.filter(macroName=data[2])[0]
             newMacroAction = Macros(macroName=data[0], macro=macro, user=request.user)
