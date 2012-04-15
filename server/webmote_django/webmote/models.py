@@ -4,7 +4,7 @@ from django import forms
 from django.forms.widgets import TextInput, PasswordInput
 from django.contrib.auth.models import User
 
-import serial, sys, os, binascii
+import serial, sys, os, glob
 import struct
 
 ################
@@ -158,8 +158,12 @@ class X10_CommandsForm(CommandsForm):
         exclude = ('state', 'device', 'code', 'lastCommand')
 
 def findX10Modem():
-    print "Found X10 modem at /dev/ttyUSB0 (BS at the moment)"
-    return '/dev/ttyUSB0'
+    for port in glob.glob('/dev/ttyUSB*') + glob.glob('/dev/ttyACM*'):
+        ser = serial.Serial(port, 9600)
+        if ser.isOpen():
+            ser.write('Who')
+            if 'X10 Transceiver' in ser.readline():
+                return port
 
 ################
 # IR
