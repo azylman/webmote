@@ -4,7 +4,7 @@ from django import forms
 from django.forms.widgets import TextInput, PasswordInput
 from django.contrib.auth.models import User
 
-import serial, sys, os, binascii
+import serial, sys, os, glob
 import struct
 
 ################
@@ -111,6 +111,7 @@ class X10_Devices(Devices):
     type = models.CharField(max_length=100, choices=X10_DEVICE_TYPES)
     modelNumber = models.CharField(max_length=100, choices=X10_KNOWN_MODELS)
     state = models.IntegerField(default=0)
+    lastCommand = models.IntegerField(null=True)
 
     def save(self, *args, **kwargs):
         super(X10_Devices, self).save(*args, **kwargs)
@@ -135,13 +136,16 @@ class X10_Devices(Devices):
             print 'FAILED to run \'' + command.name + '\' on \'' + command.device.name + '\' (X10)'
             return False
 
+    def getState(self):
+        return 1
+
 class X10_DevicesForm(DevicesForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Fan, Lamp, etc.'}))
     house = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Any letter A-P'}))
     unit = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Any number 1-16'}))
     class Meta:
         model = X10_Devices
-        exclude = ('state',)
+        exclude = ('state', 'lastCommand')
 
 class X10_Commands(Commands):
    # modelNumber = models.ForeignKey(X10_Devices)
@@ -151,11 +155,15 @@ class X10_CommandsForm(CommandsForm):
     code = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. 1110211'}))
     class Meta:
         model = X10_Commands
-        exclude = ('state', 'device', 'code')
+        exclude = ('state', 'device', 'code', 'lastCommand')
 
 def findX10Modem():
-    print "Found X10 modem at /dev/ttyUSB0 (BS at the moment)"
-    return '/dev/ttyUSB0'
+    for port in glob.glob('/dev/ttyUSB*') + glob.glob('/dev/ttyACM*'):
+        ser = serial.Serial(port, 9600)
+        if ser.isOpen():
+            ser.write('Who')
+            if 'X10 Transceiver' in ser.readline():
+                return port
 
 ################
 # IR
@@ -244,7 +252,8 @@ class Profiles(models.Model):
     profileName = models.CharField(max_length=100)
     user = models.ForeignKey(User)
     device = models.ForeignKey(Devices)
-    deviceState = models.IntegerField()
+    deviceState = models.CharField(max_length=100)
+    lastCommand = models.IntegerField(null=True)
 
 class Macros(models.Model):
     macroName = models.CharField(max_length=100)

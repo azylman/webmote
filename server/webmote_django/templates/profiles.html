@@ -29,45 +29,6 @@ Profiles - Home Control
                 </div>
             </div>
 
-<!--            All Off-->
-            <div class="ui-grid-b" id=profiles_grid_row_All_Off">
-                <div class="ui-block-a">
-                    <div class="ui-bar ui-bar-a" style="height:30px">All Off</div>
-                </div>
-                <div class="ui-block-b">
-                    <div class="ui-bar ui-bar-a" style="height:30px">
-<!--                        Would prefer that this was done via Ajax-->
-                        <form method="post" action="">{% csrf_token %}
-                            <input type="submit" name="loadProfile" value="Set" onclick="this.value='All Off';this.form.post()"/>
-                        </form>
-                    </div>
-                </div>
-                <div class="ui-block-c">
-                    <div class="ui-bar ui-bar-a" style="height:30px">
-                    </div>
-                </div>
-            </div>
-
-<!--            All On-->
-            <div class="ui-grid-b" id=profiles_grid_row_All_On">
-                <div class="ui-block-a">
-                    <div class="ui-bar ui-bar-a" style="height:30px">All On</div>
-                </div>
-                <div class="ui-block-b">
-                    <div class="ui-bar ui-bar-a" style="height:30px">
-<!--                        Would prefer that this was done via Ajax-->
-                        <form method="post" action="">{% csrf_token %}
-                            <input type="submit" name="loadProfile" value="Set" onclick="this.value='All On';this.form.post()"/>
-                        </form>
-                    </div>
-                </div>
-                <div class="ui-block-c">
-                    <div class="ui-bar ui-bar-a" style="height:30px">
-                    </div>
-                </div>
-            </div>
-
-
             {% for profile in profiles %}
             <div class="ui-grid-b" id=profiles_grid_row_{{ profile.id }}">
                 <div class="ui-block-a">
