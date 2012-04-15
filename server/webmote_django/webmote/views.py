@@ -50,8 +50,6 @@ def getActionInfo(request):
         return HttpResponse(simplejson.dumps(commandNames), mimetype='application/javascript')
     if data[1] == 'profile':
         profileNames = []
-        profileNames.append('All On')
-        profileNames.append('All Off')
         for profile in Profiles.objects.filter(user=request.user):
             if not profile.profileName in profileNames:
                 profileNames.append(profile.profileName)
@@ -155,15 +153,19 @@ def profiles(request):
         if 'saveProfile' in request.POST:
             for abstractDevice in getAllowedDevices(request.user.id):
                 device = abstractDevice.getSubclassInstance()
+                profile = Profiles(user=request.user, profileName=request.POST['profileName'], device=device)
                 if hasattr(device, 'state'):
-                    profile = Profiles(user=request.user, profileName=request.POST['profileName'], device=device, deviceState=device.state)
+                    profile.deviceState = device.state
+                    profile.save()
+                if hasattr(device, 'lastCommand'):
+                    profile.lastCommand = device.lastCommand
                     profile.save()
         if 'deleteProfile' in request.POST:
             profileName = Profiles.objects.filter(id=request.POST['deleteProfile'])[0].profileName
             Profiles.objects.filter(profileName=profileName, user=request.user).delete()
         if 'loadProfile' in request.POST:
-            profileName = Profiles.objects.filter(id=request.POST['deleteProfile'])[0].profileName
-            loadProfile(request.user.id, profileName, request)
+            profileName = Profiles.objects.filter(id=request.POST['loadProfile'])[0].profileName
+            loadProfile(profileName)
     unique = []
     uniqueNames = []
     for profile in Profiles.objects.filter(user=request.user):
@@ -319,8 +321,10 @@ def runCommand(deviceNum, commandNum):
         if not device.runCommand(command):
             context['error'] = "Command Failed to run"
         if 'error' not in context and hasattr(device, 'state'):
-            #device.state = getState()
-            device.state = 1
+            device.state = device.getState()
+            device.save()
+        if 'error' not in context and hasattr(device, 'lastCommand'):
+            device.lastCommand = commandNum
             device.save()
     else:
         context['error'] = "Command Failed to run"
@@ -331,21 +335,11 @@ def runMacro(macroName, user):
         if macro.runnable():
             if macro.macro:
                 runMacro(macro.macro.macroName, user)
+            if macro.profile:
+                loadProfile(macro.profile.profileName)
             else:
                 runCommand(macro.command.device.id, macro.command.id)
 
-
-def loadProfile(userID, profileName, request):
-    for abstractDevice in getAllowedDevices(userID):
-        device = abstractDevice.getSubclassInstance()
-        if hasattr(device, 'state'):
-            if profileName == "All On":
-                print "All On"
-                runCommand(device.id, 100)
-            if profileName == "All Off":
-                print "All Off"
-                runCommand(device.id, 0)
-            else:
-                profile = Profiles.objects.filter(profileName=profileName, device=abstractDevice)
-                if profile:
-                    runCommand(device.id, profile[0].deviceState)
+def loadProfile(profileName):
+    for profile in Profiles.objects.filter(profileName=profileName):
+        runCommand(profile.device.id, profile.lastCommand)
