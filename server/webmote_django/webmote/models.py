@@ -217,11 +217,11 @@ class IR_Database_Entry(models.Model):
     
     def parseFromLine(self, line):
         values = line.strip().split(',')
-        this.manufacturer = newEntry.values[0]
-        this.model = newEntry.values[1]
-        this.command = newEntry.values[2]
-        this.normalized_command = newEntry.values[3]
-        this.code = newEntry.values[4]
+        manufacturer = values[0]
+        model = values[1]
+        command = values[2]
+        normalized_command = values[3]
+        code = values[4]
 
 ################
 # Misc.
