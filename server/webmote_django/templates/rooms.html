@@ -3,14 +3,14 @@
 {% extends "jqm/simple.html" %}
 {% endcomment %}
 
+{% block title %}
+    Webmote - Rooms
+{% endblock %}
+
 {% block page_title %}
-    Webmote
+    Webmote - Rooms
 {% endblock %}
 {% block content %}
-{% if user.is_anonymous %}
-    <p>Go ahead and take control by logging in.</p>
-    <a data-role="button" href="{% url login %}">Log In</a>
-{% else %}
     <div data-role="content">	
         {% if rooms %}
             <ul data-role="listview" data-inset="true">
@@ -25,5 +25,4 @@
             {% endif %}
         {% endif %}
     </div>
-{% endif %}
 {% endblock %}

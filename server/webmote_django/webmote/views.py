@@ -26,13 +26,17 @@ def identification(request):
     else:
         return render_to_response('fail.html')
 
+def logout_view(request):
+    logout(request)
+    return redirect('/')
+
 @login_required
 def index(request):
     return render_to_response('index.html', context_instance=RequestContext(request))
 
-def logout_view(request):
-    logout(request)
-    return redirect('/')
+@login_required
+def help(request):
+    return render_to_response('help.html', context_instance=RequestContext(request))
 
 @login_required
 def getActionInfo(request):
