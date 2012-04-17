@@ -62,5 +62,11 @@
                 <input type="submit" name="addCommand" value="Add Command" />
             </form>
         </div>
+        {% if canRecord %}
+        <div id="recordCommand">
+            <h3>Or record a command</h3>
+            <a href="#" data-role="button" data-theme="a" onclick="recordCommand('{{device.id }}')">Record</a>
+        </div>
+        {% endif %}
     </div>
 {% endblock %}
