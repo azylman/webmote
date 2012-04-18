@@ -149,6 +149,18 @@ void dPrint(String str) {
     }
 }
 
+void dPrintHEX(unsigned long in) {
+    if (DEBUG) {
+        Serial.print(in, HEX);
+    }
+}
+
+void dPrintDEC(unsigned int in) {
+    if (DEBUG) {
+        Serial.print(in, DEC);
+    }
+}
+
 // Stores the code for later playback
 // Most of this code is just logging
 void storeCode(decode_results *results) {
@@ -165,16 +177,16 @@ void storeCode(decode_results *results) {
             if (i % 2) {
                 // Mark
                 rawCodes[i - 1] = results->rawbuf[i]*USECPERTICK - MARK_EXCESS;
-                Serial.print(" m");
+                dPrint(" m");
             } 
             else {
                 // Space
                 rawCodes[i - 1] = results->rawbuf[i]*USECPERTICK + MARK_EXCESS;
-                Serial.print(" s");
+                dPrint(" s");
             }
-            Serial.print(rawCodes[i - 1], DEC);
+            dPrintDEC(rawCodes[i - 1]);
         }
-        Serial.println("");
+        dPrint("\n");
     }
     else {
         if (codeType == NEC) {
@@ -199,7 +211,8 @@ void storeCode(decode_results *results) {
         //dPrint(codeType, DEC);
         dPrint("\n");
     }
-    //Serial.println(results->value, HEX);
+    dPrintHEX(results->value);
+    dPrint("\n");
     codeValue = results->value;
     codeLen = results->bits;
   }
@@ -210,18 +223,20 @@ void sendCode(int repeat, long int new_code) {
         codeValue = new_code;
         if (repeat) {
             irsend.sendNEC(REPEAT, codeLen);
-            Serial.print("Sent NEC repeat");
+            dPrint("Sent NEC repeat");
         } 
         else {
             irsend.sendNEC(codeValue, codeLen);
-            Serial.print("Sent NEC ");
-            Serial.println(codeValue, HEX);
+            dPrint("Sent NEC ");
+            dPrintHEX(codeValue);
+            dPrint("\n");
         }
     }
     else if (codeType == SONY) {
         irsend.sendSony(codeValue, codeLen);
-        Serial.print("Sent Sony ");
-        Serial.println(codeValue, HEX);
+        dPrint("Sent Sony ");
+        dPrintHEX(codeValue);
+        dPrint("\n");
     } 
     else if (codeType == RC5 || codeType == RC6) {
         if (!repeat) {
@@ -232,19 +247,21 @@ void sendCode(int repeat, long int new_code) {
         codeValue = codeValue & ~(1 << (codeLen - 1));
         codeValue = codeValue | (toggle << (codeLen - 1));
         if (codeType == RC5) {
-            Serial.print("Sent RC5 ");
-            Serial.println(codeValue, HEX);
             irsend.sendRC5(codeValue, codeLen);
+            dPrint("Sent RC5 ");
+            dPrintHEX(codeValue);
+            dPrint("\n");
         } 
         else {
             irsend.sendRC6(codeValue, codeLen);
-            Serial.print("Sent RC6 ");
-            Serial.println(codeValue, HEX);
+            dPrint("Sent RC6 ");
+            dPrintHEX(codeValue);
+            dPrint("\n");
         }
     }
     else if (codeType == UNKNOWN /* i.e. raw */) {
         // Assume 38 KHz
         irsend.sendRaw(rawCodes, codeLen, 38);
-        Serial.println("Sent raw");
+        dPrint("Sent raw\n");
     }
 }
