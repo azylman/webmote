@@ -19,8 +19,6 @@ http://www.arcfn.com/2009/08/multi-protocol-infrared-remote-library.html
 
 #define recordWaitTime 3 //in minutes
 #define MAXMSGLEN 100
-#define LED 10
-#define PT 11
 #define RECV_PIN 11
 #define BUTTON_PIN 8
 #define STATUS_PIN 13
@@ -51,8 +49,6 @@ int toggle = 0; // The RC5/6 toggle state
 void setup() {
     Serial.begin(9600);
     restoreID();
-    pinMode(LED, OUTPUT);
-    pinMode(PT, INPUT);
     irrecv.enableIRIn(); // Start the receiver
     pinMode(BUTTON_PIN, INPUT);
     pinMode(STATUS_PIN, OUTPUT);
@@ -119,28 +115,36 @@ void parseMessage(String message) {
 
 void playCommand() {
     dPrint("Play command with data: ");
+    digitalWrite(STATUS_PIN, HIGH);
     dPrint(data);
     dPrint("\n");
-    // Coming soon
-    sendCode(1, 2011275481);
+
+    // Why doesn't this work?
+    sendCode(0, codeValue);
+
+    digitalWrite(STATUS_PIN, LOW);
 }
 
 void recordCommand() {
     dPrint("Record command\n");
-    // Coming soon
+    digitalWrite(STATUS_PIN, HIGH);
     irrecv.enableIRIn();
+    // Eventually should add a timeout here
+    while (!irrecv.decode(&results)) {}
     storeCode(&results);
     irrecv.resume(); // resume receiver
-    //Should send some info back to the server here
-    //Serial.println(String(results))
+    Serial.println("Should send this back to the server here");
+    digitalWrite(STATUS_PIN, LOW);
 }
 
 void assignID() {
+    digitalWrite(STATUS_PIN, HIGH);
     EEPROM.write(0, atoi(&data[0]));
     transceiverID = atoi(&data[0]);
     dPrint("Assigned ID to transceiver: ");
     dPrint(transceiverID);
     dPrint("\n");
+    digitalWrite(STATUS_PIN, LOW);
 }
 
 void dPrint(String str) {
@@ -209,7 +213,7 @@ void storeCode(decode_results *results) {
     else {
         dPrint("Unexpected codeType ");
         dPrintDEC(codeType);
-        dPrint("\n");
+    dPrint(" ");
     }
     dPrintHEX(results->value);
     dPrint("\n");
