@@ -208,7 +208,7 @@ void storeCode(decode_results *results) {
     } 
     else {
         dPrint("Unexpected codeType ");
-        //dPrint(codeType, DEC);
+        dPrintDEC(codeType);
         dPrint("\n");
     }
     dPrintHEX(results->value);
