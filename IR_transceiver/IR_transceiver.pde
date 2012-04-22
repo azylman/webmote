@@ -165,7 +165,7 @@ void recordCommand() {
     // Eventually should add a timeout here
     while (!irrecv.decode(&results)) {}
     storeCode(&results);
-    irrecv.resume(); // resume receiver
+    irrecv.resume();
     dPrint("\nSent to server: ");
     Serial.println(String(transceiverID) + String("p") + String(codeType) + String(codeLen) + String(codeValue));
     digitalWrite(STATUS_PIN, LOW);
