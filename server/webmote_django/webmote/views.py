@@ -189,9 +189,10 @@ def recordCommand(request):
             device = Devices.objects.filter(id=int(newCommandInfo[0]))[0]
             commandType = device.getCorrespondingCommandType()
             command = commandType(device=device, name=newCommandInfo[1])
-            command.recordCommand()
-            command.save()
-        return render_to_response('index.html', context_instance=RequestContext(request))
+            if command.recordCommand(device.id):
+                command.save()
+            print 'returned'
+        return HttpResponse(simplejson.dumps(''), mimetype='application/javascript')
             
 @login_required
 def userPermissions(request):

@@ -25,7 +25,7 @@ http://www.arcfn.com/2009/08/multi-protocol-infrared-remote-library.html
 #define STATUS_PIN 13
 
 
-#define DEBUG true
+#define DEBUG false
 
 IRrecv irrecv(RECV_PIN);
 IRsend irsend;
@@ -48,7 +48,7 @@ int codeLen; // The length of the code
 int toggle = 0; // The RC5/6 toggle state
 
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(1200);
     // EEPROM.write(0, 0); // Flash messageDestination on EEPROM
     restoreID();
     irrecv.enableIRIn(); // Start the receiver
@@ -161,8 +161,6 @@ void playCommand() {
     dPrintLONG(codeValue);
     dPrint("\n");
 
-    // Why doesn't this work?
-    //irsend.sendNEC(codeValue, codeLen);
     sendCode(0, codeValue);
 
     digitalWrite(STATUS_PIN, LOW);
@@ -176,8 +174,8 @@ void recordCommand() {
     while (!irrecv.decode(&results)) {}
     storeCode(&results);
     irrecv.resume(); // resume receiver
-    Serial.print("\nShould send this code back to the server: ");
-    Serial.print(String(transceiverID) + String("p") + String(codeType) + String(codeLen) + String(codeValue));
+    dPrint("\nSent to server: ");
+    Serial.println(String(transceiverID) + String("p") + String(codeType) + String(codeLen) + String(codeValue));
     digitalWrite(STATUS_PIN, LOW);
 }
 
