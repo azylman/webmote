@@ -1,6 +1,6 @@
 /* Webmote - Tranceiver Code
 
-Authors: Daniel Myers, 
+Authors: Daniel Myers, Alex Wilson
 
 Description:
 This code runs on all transcievers belonging to the webmote system
@@ -17,6 +17,7 @@ http://www.arcfn.com/2009/08/multi-protocol-infrared-remote-library.html
 #include <EEPROM.h>
 #include <IRremote.h>
 
+
 #define recordWaitTime 3 //in minutes
 #define MAXMSGLEN 100
 #define RECV_PIN 11
@@ -24,7 +25,7 @@ http://www.arcfn.com/2009/08/multi-protocol-infrared-remote-library.html
 #define STATUS_PIN 13
 
 
-#define DEBUG false
+#define DEBUG true
 
 IRrecv irrecv(RECV_PIN);
 IRsend irsend;
@@ -40,7 +41,7 @@ int messageDestination;
 int transceiverID = 0;
 
 // Storage for the recorded code
-int codeType = -1; // The type of code
+int codeType = 0; // The type of code
 unsigned long codeValue; // The code value if not raw
 unsigned int rawCodes[RAWBUF]; // The durations if raw
 int codeLen; // The length of the code
@@ -48,6 +49,7 @@ int toggle = 0; // The RC5/6 toggle state
 
 void setup() {
     Serial.begin(9600);
+    // EEPROM.write(0, 0); // Flash messageDestination on EEPROM
     restoreID();
     irrecv.enableIRIn(); // Start the receiver
     pinMode(BUTTON_PIN, INPUT);
@@ -66,7 +68,7 @@ void loop() {
                 message[index++] = inChar;
                 message[index] = '\0';
             }
-            delay(100);
+            delay(10);
         }
         parseMessage(message);
         if (transceiverID == messageDestination) {
@@ -94,7 +96,7 @@ void requestID() {
 void restoreID() {
     transceiverID = EEPROM.read(0);
     dPrint("Restored ID as: ");
-    dPrint(transceiverID);
+    dPrintDEC(transceiverID);
     dPrint("\n");
 }
 
@@ -102,24 +104,65 @@ void parseMessage(String message) {
     messageDestination = atoi(&message[0]);
     commandType = char(message[1]);
     data = message.substring(2);
+    codeType = atoi(&(message.substring(2,3))[0]);
+    codeLen = atoi(&(message.substring(3,5))[0]);
+    codeValue = atol(&message[5]);
 
     dPrint("\nParsed Message: \n");
     dPrint("\tDestination: ");
-    dPrint(messageDestination);
+    dPrintDEC(messageDestination);
     dPrint("\n\tCommand Type: ");
-    dPrint(commandType);
-    dPrint("\n\tData: ");
-    dPrint(data);
+    switch (commandType) {
+        case 97:
+            dPrint("Assign");
+            break;
+        case 114:
+            dPrint("Record");
+            break;
+        case 112:
+            dPrint("Play");
+            break;
+        default:
+            dPrint("Unrecognized Command");
+            break;
+    }
+    dPrint("\n\tIR Protocol: ");
+    switch (codeType) {
+        case 1:
+            dPrint("NEC");
+            break;
+        case 2:
+            dPrint("SONY");
+            break;
+        case 3:
+            dPrint("RC5");
+            break;
+        case 4:
+            dPrint("RC6");
+            break;
+        case 0:
+            dPrint("RAW");
+            break;
+        default:
+            dPrintDEC(codeType);
+            break;
+    }
+    dPrint("\n\tIR Code Data: ");
+    dPrintLONG(codeValue);
+    dPrint("\n\tIR Code Length: ");
+    dPrintDEC(codeLen);
     dPrint("\n");
 }
 
 void playCommand() {
     dPrint("Play command with data: ");
     digitalWrite(STATUS_PIN, HIGH);
-    dPrint(data);
+    //parseIRData(data);
+    dPrintLONG(codeValue);
     dPrint("\n");
 
     // Why doesn't this work?
+    //irsend.sendNEC(codeValue, codeLen);
     sendCode(0, codeValue);
 
     digitalWrite(STATUS_PIN, LOW);
@@ -133,7 +176,8 @@ void recordCommand() {
     while (!irrecv.decode(&results)) {}
     storeCode(&results);
     irrecv.resume(); // resume receiver
-    Serial.println("Should send this back to the server here");
+    Serial.print("\nShould send this code back to the server: ");
+    Serial.print(String(transceiverID) + String("p") + String(codeType) + String(codeLen) + String(codeValue));
     digitalWrite(STATUS_PIN, LOW);
 }
 
@@ -142,7 +186,7 @@ void assignID() {
     EEPROM.write(0, atoi(&data[0]));
     transceiverID = atoi(&data[0]);
     dPrint("Assigned ID to transceiver: ");
-    dPrint(transceiverID);
+    dPrintDEC(transceiverID);
     dPrint("\n");
     digitalWrite(STATUS_PIN, LOW);
 }
@@ -163,6 +207,28 @@ void dPrintDEC(unsigned int in) {
     if (DEBUG) {
         Serial.print(in, DEC);
     }
+}
+
+void dPrintLONG(unsigned long in) {
+    if (DEBUG) {
+        Serial.print(in, DEC);
+    }
+}
+
+// This extracts the IR protocol, IR signal data, and other information from the message data
+void parseIRData(String data) {
+    codeType = data[0];
+    codeLen = 32;
+    //codeValue = data.substring(1);
+
+    dPrint("\nParsed IR Data: \n");
+    dPrint("\tCode Type: ");
+    dPrintDEC(codeType);
+    dPrint("\n\tCode Length: ");
+    dPrintDEC(codeLen);
+    dPrint("\n\tIR Data: ");
+    dPrint(data);
+    dPrint("\n");
 }
 
 // Stores the code for later playback
@@ -215,7 +281,7 @@ void storeCode(decode_results *results) {
         dPrintDEC(codeType);
     dPrint(" ");
     }
-    dPrintHEX(results->value);
+    dPrintLONG(results->value);
     dPrint("\n");
     codeValue = results->value;
     codeLen = results->bits;
@@ -223,9 +289,8 @@ void storeCode(decode_results *results) {
 }
 
 void sendCode(int repeat, long int new_code) {
-    Serial.println("Played command");
+    codeValue = new_code;
     if (codeType == NEC) {
-        codeValue = new_code;
         if (repeat) {
             irsend.sendNEC(REPEAT, codeLen);
             dPrint("Sent NEC repeat");
