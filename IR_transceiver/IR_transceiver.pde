@@ -223,6 +223,7 @@ void storeCode(decode_results *results) {
 }
 
 void sendCode(int repeat, long int new_code) {
+    Serial.println("Played command");
     if (codeType == NEC) {
         codeValue = new_code;
         if (repeat) {

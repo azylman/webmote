@@ -174,9 +174,20 @@ class IR_Devices(Devices):
 
     def runCommand(self, command):
         print "called run command on IR"
-        if True:
+        print 'Playing...'
+        # get the transciever number and tell it to record
+        transceiverID = '2'
+        command = transceiverID + 'p' + str(self.protocol) + str(self.code)
+        command = transceiverID + 'p' + 'werwerw'
+        try:
+            ser = serial.Serial(getIRDongle(), 9600)
+            ser.write(command)
+            #response = str(ser.readline())
+            #print response
+            print 'Played Command Succesfully'
             return True
-        else:
+        except:
+            print 'Failed to play'
             return False
 
 class IR_DevicesForm(DevicesForm):
