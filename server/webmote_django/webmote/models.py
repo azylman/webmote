@@ -175,7 +175,7 @@ class IR_Devices(Devices):
     def runCommand(self, command):
         print "called run command on IR"
         try:
-            ser = serial.Serial(getIRDongle(), 1200)
+            ser = serial.Serial(getIRDongle(), 9600)
             actualCommand = command.getSubclassInstance()
             print actualCommand.code
             ser.write(actualCommand.code)
@@ -202,7 +202,7 @@ class IR_Commands(Commands):
         transceiverID = '2'
         command = transceiverID + 'rrr'
         try:
-            ser = serial.Serial(getIRDongle(), 1200)
+            ser = serial.Serial(getIRDongle(), 9600)
             ser.write(command)
             self.code = str(ser.readline())
             print 'Recorded Command Succesfully'
@@ -220,7 +220,7 @@ class IR_CommandsForm(CommandsForm):
 
 # This should get called on setup or if there are communication problems. maybe set the value in the db?
 def getIRDongle():
-    return '/dev/ttyACM1'
+    return '/dev/ttyUSB1'
 
 
 

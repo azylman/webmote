@@ -24,13 +24,12 @@ http://www.arcfn.com/2009/08/multi-protocol-infrared-remote-library.html
 #define BUTTON_PIN 8
 #define STATUS_PIN 13
 
-
-#define DEBUG false
-
 IRrecv irrecv(RECV_PIN);
 IRsend irsend;
 
 decode_results results;
+
+bool DEBUG = 0;
 
 char message[MAXMSGLEN];
 char inChar = -1;
@@ -48,7 +47,7 @@ int codeLen; // The length of the code
 int toggle = 0; // The RC5/6 toggle state
 
 void setup() {
-    Serial.begin(1200);
+    Serial.begin(9600);
     // EEPROM.write(0, 0); // Flash messageDestination on EEPROM
     restoreID();
     irrecv.enableIRIn(); // Start the receiver
@@ -82,6 +81,13 @@ void loop() {
                 case 'a':
                     assignID();
                     break;
+                case 'd':
+                    DEBUG = !DEBUG;
+                    dPrint("Turned Debug On\n");
+                    break;
+                default:
+                    dPrint("Unrecognized Command");
+                    break;
             }
         }
         index = 0;
@@ -112,20 +118,6 @@ void parseMessage(String message) {
     dPrint("\tDestination: ");
     dPrintDEC(messageDestination);
     dPrint("\n\tCommand Type: ");
-    switch (commandType) {
-        case 97:
-            dPrint("Assign");
-            break;
-        case 114:
-            dPrint("Record");
-            break;
-        case 112:
-            dPrint("Play");
-            break;
-        default:
-            dPrint("Unrecognized Command");
-            break;
-    }
     dPrint("\n\tIR Protocol: ");
     switch (codeType) {
         case 1:

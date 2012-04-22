@@ -239,9 +239,9 @@ function recordCommand(deviceID) {
             dataType: 'text',
             success: function(result) {
                 $.mobile.hidePageLoadingMsg();
+                location.reload(true);
             }
         });
     }
-    //location.reload(true);
 }
 
