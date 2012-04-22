@@ -4,7 +4,7 @@ from django import forms
 from django.forms.widgets import TextInput, PasswordInput
 from django.contrib.auth.models import User
 
-import serial, sys, os, glob
+import serial, sys, os, glob, time
 import struct
 
 ################
@@ -187,6 +187,26 @@ class IR_DevicesForm(DevicesForm):
 
 class IR_Commands(Commands):
     code = models.IntegerField()
+    protocol = models.IntegerField()
+
+    def recordCommand(deviceID):
+        print 'Recording...'
+        # get the transciever number and tell it to record
+        transceiverID = '2'
+        command = transceiverID + 'rplaceholder'
+        try:
+            ser = serial.Serial(getIRDongle(), 9600)
+            ser.write(command)
+            response = str(ser.readline())
+            print response
+            self.protocol = int(response)
+            self.code = (response)
+            print 'Recorded Command Succesfully'
+            return True
+        except:
+            print 'Failed to record'
+            return False
+
 
 class IR_CommandsForm(CommandsForm):
     code = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. 1110211'}))
@@ -194,21 +214,9 @@ class IR_CommandsForm(CommandsForm):
         model = IR_Commands
         exclude = ('device',)
 
-# Some left over code
-def IRSend(command):
-    try:
-        # this should pull the location of the xbee from the db
-        ser = serial.Serial('/dev/ttyACM0', 9600)
-        ser.write(command)
-        return 1
-    except:
-        determineIRPort()
-        return False
-
-
 # This should get called on setup or if there are communication problems. maybe set the value in the db?
-def determineIRPort():
-    return '/dev/ttyUSB0'
+def getIRDongle():
+    return '/dev/ttyACM0'
 
 
 

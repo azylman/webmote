@@ -176,10 +176,23 @@ def profiles(request):
     context['profiles'] = unique
     return render_to_response('profiles.html', context, context_instance=RequestContext(request))
 
+
 ################
 # Admin Views
 ################
 
+@login_required
+def recordCommand(request):
+    if request.user.is_superuser:
+        if request.method == 'POST':
+            newCommandInfo = simplejson.loads(request.raw_post_data)
+            device = Devices.objects.filter(id=int(newCommandInfo[0]))[0]
+            commandType = device.getCorrespondingCommandType()
+            command = commandType(device=device, name=newCommandInfo[1])
+            command.recordCommand()
+            command.save()
+        return render_to_response('index.html', context_instance=RequestContext(request))
+            
 @login_required
 def userPermissions(request):
     if request.user.is_superuser:
@@ -268,6 +281,10 @@ def device(request, num="1"):
         context['deviceForm'] = deviceForm(instance=device.getSubclassInstance())
         context['commands'] = device.commands_set.all()
         context['commandForm'] = commandForm
+        commandType = device.getCorrespondingCommandType()
+        command = commandType()
+        if hasattr(command, 'recordCommand'):
+            context['recordable'] = True
         return render_to_response('device.html', context, context_instance=RequestContext(request))
 		
 @login_required

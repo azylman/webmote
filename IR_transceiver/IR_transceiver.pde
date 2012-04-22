@@ -24,7 +24,7 @@ http://www.arcfn.com/2009/08/multi-protocol-infrared-remote-library.html
 #define STATUS_PIN 13
 
 
-#define DEBUG true
+#define DEBUG false
 
 IRrecv irrecv(RECV_PIN);
 IRsend irsend;

@@ -56,16 +56,19 @@
             {% endif %}
         </div>
         <div id="addCommand">
-            <h2>Add Custom Command</h2>
+            <h2>Add a custom command manually</h2>
             <form method="POST" action="">{% csrf_token %}
                 {{ commandForm.as_table }}
                 <input type="submit" name="addCommand" value="Add Command" />
             </form>
         </div>
-        {% if canRecord %}
-        <div id="recordCommand">
-            <h3>Or record a command</h3>
-            <a href="#" data-role="button" data-theme="a" onclick="recordCommand('{{device.id }}')">Record</a>
+        {% if recordable %}
+        <div id="recordCommandDiv">
+            <h2>Or record a command</h2>
+            <form>
+                Name: <input type="text" id="recordCommandName" placeholder="e.g. On, Off, etc."/>
+            </form>
+            <a href="#" data-role="button" data-theme="c" onclick="recordCommand({{ device.id }})">Record Command</a>
         </div>
         {% endif %}
     </div>

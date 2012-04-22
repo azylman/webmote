@@ -220,3 +220,28 @@ function savePermissions() {
     });
 }
 
+function recordCommand(deviceID) {
+    $.mobile.loadingMessage = 'Recording Command';
+    $.mobile.showPageLoadingMsg();
+
+    // Get new commands's name (check that it isn't missing)
+    var commandName = $('#recordCommandName').val();
+    if (commandName == '') {
+        $.mobile.hidePageLoadingMsg();
+        alert('Please enter a name for the command.')
+    } else {
+        // POST request with the deviceID, the command's name
+        $.ajax({
+            url: '/record_command/',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify([deviceID, commandName]),
+            dataType: 'text',
+            success: function(result) {
+                $.mobile.hidePageLoadingMsg();
+            }
+        });
+    }
+    location.reload(true);
+}
+
