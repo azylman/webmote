@@ -1,6 +1,6 @@
 /* Webmote - Tranceiver Code
 
-Authors: Daniel Myers, Alex Wilson
+Authors: Daniel Myers and Alex Wilson
 
 Description:
 This code runs on all transcievers belonging to the webmote system
