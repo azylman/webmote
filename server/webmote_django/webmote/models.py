@@ -174,14 +174,11 @@ class IR_Devices(Devices):
 
     def runCommand(self, command):
         print "called run command on IR"
-        print 'Playing...'
-        # get the transciever number and tell it to record
-        transceiverID = '2'
-        command = transceiverID + 'p' + str(self.protocol) + str(self.code)
-        command = transceiverID + 'p' + 'werwerw'
         try:
             ser = serial.Serial(getIRDongle(), 9600)
-            ser.write(command)
+            actualCommand = command.getSubclassInstance()
+            print actualCommand.code
+            ser.write(actualCommand.code)
             #response = str(ser.readline())
             #print response
             print 'Played Command Succesfully'
@@ -197,21 +194,17 @@ class IR_DevicesForm(DevicesForm):
         model = IR_Devices
 
 class IR_Commands(Commands):
-    code = models.IntegerField()
-    protocol = models.IntegerField()
+    code = models.CharField(max_length=200)
 
-    def recordCommand(deviceID):
+    def recordCommand(self, deviceID):
         print 'Recording...'
         # get the transciever number and tell it to record
         transceiverID = '2'
-        command = transceiverID + 'rplaceholder'
+        command = transceiverID + 'rrr'
         try:
             ser = serial.Serial(getIRDongle(), 9600)
             ser.write(command)
-            response = str(ser.readline())
-            print response
-            self.protocol = int(response)
-            self.code = (response)
+            self.code = str(ser.readline())
             print 'Recorded Command Succesfully'
             return True
         except:
@@ -227,7 +220,7 @@ class IR_CommandsForm(CommandsForm):
 
 # This should get called on setup or if there are communication problems. maybe set the value in the db?
 def getIRDongle():
-    return '/dev/ttyACM0'
+    return '/dev/ttyUSB0'
 
 
 

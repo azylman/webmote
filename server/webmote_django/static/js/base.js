@@ -221,7 +221,7 @@ function savePermissions() {
 }
 
 function recordCommand(deviceID) {
-    $.mobile.loadingMessage = 'Recording Command';
+    $.mobile.loadingMessage = 'Aim remote at transceiver and press the button you want to record!';
     $.mobile.showPageLoadingMsg();
 
     // Get new commands's name (check that it isn't missing)
@@ -239,9 +239,9 @@ function recordCommand(deviceID) {
             dataType: 'text',
             success: function(result) {
                 $.mobile.hidePageLoadingMsg();
+                location.reload(true);
             }
         });
     }
-    location.reload(true);
 }
 

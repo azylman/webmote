@@ -24,13 +24,12 @@ http://www.arcfn.com/2009/08/multi-protocol-infrared-remote-library.html
 #define BUTTON_PIN 8
 #define STATUS_PIN 13
 
-
-#define DEBUG true
-
 IRrecv irrecv(RECV_PIN);
 IRsend irsend;
 
 decode_results results;
+
+bool DEBUG = 0;
 
 char message[MAXMSGLEN];
 char inChar = -1;
@@ -82,6 +81,13 @@ void loop() {
                 case 'a':
                     assignID();
                     break;
+                case 'd':
+                    DEBUG = !DEBUG;
+                    dPrint("Turned Debug On\n");
+                    break;
+                default:
+                    dPrint("Unrecognized Command");
+                    break;
             }
         }
         index = 0;
@@ -112,20 +118,6 @@ void parseMessage(String message) {
     dPrint("\tDestination: ");
     dPrintDEC(messageDestination);
     dPrint("\n\tCommand Type: ");
-    switch (commandType) {
-        case 97:
-            dPrint("Assign");
-            break;
-        case 114:
-            dPrint("Record");
-            break;
-        case 112:
-            dPrint("Play");
-            break;
-        default:
-            dPrint("Unrecognized Command");
-            break;
-    }
     dPrint("\n\tIR Protocol: ");
     switch (codeType) {
         case 1:
@@ -161,8 +153,6 @@ void playCommand() {
     dPrintLONG(codeValue);
     dPrint("\n");
 
-    // Why doesn't this work?
-    //irsend.sendNEC(codeValue, codeLen);
     sendCode(0, codeValue);
 
     digitalWrite(STATUS_PIN, LOW);
@@ -175,9 +165,9 @@ void recordCommand() {
     // Eventually should add a timeout here
     while (!irrecv.decode(&results)) {}
     storeCode(&results);
-    irrecv.resume(); // resume receiver
-    Serial.print("\nShould send this code back to the server: ");
-    Serial.print(String(transceiverID) + String("p") + String(codeType) + String(codeLen) + String(codeValue));
+    irrecv.resume();
+    dPrint("\nSent to server: ");
+    Serial.println(String(transceiverID) + String("p") + String(codeType) + String(codeLen) + String(codeValue));
     digitalWrite(STATUS_PIN, LOW);
 }
 
