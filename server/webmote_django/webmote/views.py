@@ -11,7 +11,7 @@ from django.contrib.auth.views import logout_then_login
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from webmote_django.webmote.models import *
-import serial, sys, os
+import serial, sys, os, signal
 from django.utils import simplejson
 
 # This allows the javascript locater to find the server
@@ -304,9 +304,52 @@ def db_admin(request, userID = "0"):
                         newEntry.save()
         return render_to_response('db_admin.html', context, context_instance=RequestContext(request))
 
+
+@login_required
+def transceivers(request):
+    if request.user.is_superuser:
+        context = {}
+        if request.method == 'POST':
+            if 'addTransceiver' in request.POST:
+                newT = TransceiversForm(request.POST)
+                if newT.is_valid():
+                    newT.save()
+                else:
+                    context['error'] = "Transciever was invalid."
+            elif 'deleteTransceiver' in request.POST:
+                Transceivers.objects.filter(id=request.POST['deleteTransceiver']).delete()
+        context['transceivers'] = Transceivers.objects.all()
+        context['transceiversForm'] = TransceiversForm()
+        return render_to_response('transceiver.html', context, context_instance=RequestContext(request))
+
+
+@login_required
+def transceiverSearch(request):
+    if request.user.is_superuser:
+        return searchForTransceiver()
+
 ##################
 # Helper Functions 
 ##################
+
+#def tooLong(signum, frame):
+#    raise Exception("TIMED OUT")
+
+
+#signal.signal(signal.SIGALRM, tooLong)
+
+
+
+def searchForTransceiver():
+    msg = False
+#    signal.alarm(10)
+    try:
+        ser = serial.Serial('/dev/ttyUSB0', 9600)
+        msg = str(ser.readline())
+        signal.alarm(0)
+    except Exception, exc:
+        print str(exc)
+    return HttpResponse(simplejson.dumps({'deviceType' : msg.split('_')[0] }), mimetype='application/javascript')
 
 def getAllowedDevices(userID):
     if User.objects.filter(id=int(userID))[0].is_superuser:

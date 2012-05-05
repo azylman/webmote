@@ -56,7 +56,8 @@ urlpatterns = patterns('',
     url(r'^logout/$', 'webmote_django.webmote.views.logout_view'),
     url(r'^identification/$', 'webmote_django.webmote.views.identification'),
 	url(r'^db_admin/$', 'webmote_django.webmote.views.db_admin'),
-   
+   	url(r'^transceivers/$', 'webmote_django.webmote.views.transceivers'),
+   	url(r'^transceiver_search/$', 'webmote_django.webmote.views.transceiverSearch'),
 )
 
 if settings.DEBUG:

@@ -1,7 +1,7 @@
 from django.db import models
 from django.forms import ModelForm
 from django import forms
-from django.forms.widgets import TextInput, PasswordInput
+from django.forms.widgets import *
 from django.contrib.auth.models import User
 
 import serial, sys, os, glob, time
@@ -55,7 +55,13 @@ class DevicesForm(ModelForm):
     class Meta:
         model = Devices
 
+def getDeviceTypeTuples():
+    deviceTypes = []
+    for deviceType in Devices.__subclasses__():
+        deviceTypes.append((deviceType.__name__.replace('_Devices', ''), deviceType.__name__.replace('_Devices', '')))
+    return deviceTypes
 
+DEVICE_TYPES = getDeviceTypeTuples()
 
 #################
 # Webmote Command
@@ -78,6 +84,21 @@ class CommandsForm(ModelForm):
         model = Commands
     
 
+################
+# Transcievers
+################
+
+class Transceivers(models.Model):
+        type = models.CharField(max_length=100, choices=getDeviceTypeTuples())
+        location = models.CharField(max_length=100)
+        trans_id = models.IntegerField(null=True)
+
+class TransceiversForm(ModelForm):
+    location = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Kitchen, Den, etc.'}))
+
+    class Meta:
+        model = Transceivers
+        exclude = ('trans_id', 'type')
 
 ################
 # X10

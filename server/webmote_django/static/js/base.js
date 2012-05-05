@@ -245,3 +245,25 @@ function recordCommand(deviceID) {
     }
 }
 
+
+function searchForTransceiver() {
+    $.mobile.loadingMessage = 'Searching for a new transciever!';
+    $.mobile.showPageLoadingMsg();
+    //First make a request to read in all serial commands and look for ID_REQUEST
+    $.ajax({
+        url: '/transceiver_search/',
+        timeout : 10000,
+        async: true,
+        type: 'GET',
+        contentType: 'application/json; charset=utf-8',
+        dataType: 'text',
+        success: function(returned) {
+            $.mobile.hidePageLoadingMsg();
+            alert($.parseJSON(returned).deviceType);
+            //Present From
+
+        }
+    });
+
+
+}
