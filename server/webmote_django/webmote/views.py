@@ -66,6 +66,32 @@ def getActionInfo(request):
         return HttpResponse(simplejson.dumps(macroNames), mimetype='application/javascript')
     return HttpResponse(simplejson.dumps(''), mimetype='application/javascript')
 
+@login_required
+def bookmarkActions(request):
+    context = {}
+    context['devices'] = []
+    for device in getAllowedDevices(request.user.id):
+        device.commands = device.commands_set.all()
+        context['devices'].append(device)
+    context['macros'] = []
+    macroNames = []
+    for macro in Macros.objects.filter(user=request.user):
+        if not macro.macroName in macroNames:
+            context['macros'].append(macro)
+            macroNames.append(macro.macroName)
+    context['profiles'] = []
+    profileNames = []
+    for profile in Profiles.objects.filter(user=request.user):
+        if not profile.profileName in profileNames:
+            context['profiles'].append(profile)
+            profileNames.append(profile.profileName)
+    return render_to_response('bookmark_actions.html', context, context_instance=RequestContext(request))
+
+@login_required
+def bookmark(request, actionType, deviceID, commandID):
+    context = {}
+    context['name'] = performAction(request.user, actionType, deviceID, commandID)
+    return render_to_response('bookmark.html', context, context_instance=RequestContext(request))
 
 @login_required
 def runCommandView(request, deviceNum="1", command="0"):
@@ -370,6 +396,21 @@ def setUserPermissions(permissions):
             user = User.objects.filter(id=int(userID))[0]
             UserPermissions(user=user, device=device).save()
     return True
+
+def performAction(user, actionType, deviceID, commandID):
+    if 'command' in actionType:
+        runCommand(deviceID, commandID)
+        actionName = Devices.objects.filter(id=deviceID)[0].name + ' - '
+        actionName += Commands.objects.filter(id=commandID)[0].name
+        return actionName
+    if 'macro' in actionType:
+        actionName = Macros.objects.filter(id=deviceID)[0].macroName
+        runMacro(actionName, user)
+        return actionName
+    if 'profile' in actionType:
+        actionName = Profiles.objects.filter(id=deviceID)[0].profileName
+        loadProfile(actionName)
+        return actionName
 
 def runCommand(deviceNum, commandNum):
     context = {}
