@@ -311,13 +311,14 @@ def transceivers(request):
         context = {}
         if request.method == 'POST':
             if 'addTransceiver' in request.POST:
-                newT = TransceiversForm(request.POST)
-                if newT.is_valid():
-                    newT.save()
+                newTForm = TransceiversForm(request.POST)
+                if newTForm.is_valid():
+                    newTran = newTForm.save()
+                    newTran.assignID()
                 else:
                     context['error'] = "Transciever was invalid."
             elif 'deleteTransceiver' in request.POST:
-                Transceivers.objects.filter(id=request.POST['deleteTransceiver']).delete()
+                Transceivers.objects.filter(id=request.POST['deleteTransceiver'])[0].delete()
         context['transceivers'] = Transceivers.objects.all()
         context['transceiversForm'] = TransceiversForm()
         return render_to_response('transceiver.html', context, context_instance=RequestContext(request))
@@ -346,7 +347,7 @@ def searchForTransceiver():
     try:
         ser = serial.Serial('/dev/ttyUSB0', 9600)
         msg = str(ser.readline())
-        signal.alarm(0)
+#        signal.alarm(0)
     except Exception, exc:
         print str(exc)
     return HttpResponse(simplejson.dumps({'deviceType' : msg.split('_')[0] }), mimetype='application/javascript')

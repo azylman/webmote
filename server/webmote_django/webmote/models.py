@@ -89,16 +89,31 @@ class CommandsForm(ModelForm):
 ################
 
 class Transceivers(models.Model):
-        type = models.CharField(max_length=100, choices=getDeviceTypeTuples())
-        location = models.CharField(max_length=100)
-        trans_id = models.IntegerField(null=True)
+    type = models.CharField(max_length=100, choices=getDeviceTypeTuples())
+    location = models.CharField(max_length=100)
+    def assignID(self, reset = False):
+        try:
+            ser = serial.Serial('/dev/ttyUSB0', 9600)
+            if reset:
+                ser.write(str(self.id) + 'a' + str(0))
+            else:
+                ser.write(str(0) + 'a' + str(self.id))
+#            response = ser.readline()
+            print 'assigned tranceiver id: ' + str(self.id)
+        except Exception, exc:
+            print str(exc)
+        
+    def delete(self, *args, **kwargs):
+        self.assignID(True)
+        print 'resetting transceiver'
+        super(Transceivers, self).delete(*args, **kwargs)
 
 class TransceiversForm(ModelForm):
-    location = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. Kitchen, Den, etc.'}))
-
+    location = forms.CharField(widget=forms.TextInput(attrs={'placeholder' : 'e.g. Kitchen, Den, etc.'}))
+    type = forms.CharField(widget=forms.TextInput(attrs={'readonly' : True}))
     class Meta:
         model = Transceivers
-        exclude = ('trans_id', 'type')
+        exclude = ('trans_id',)
 
 ################
 # X10
