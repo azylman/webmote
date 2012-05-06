@@ -359,21 +359,11 @@ def transceiverSearch(request):
 # Helper Functions 
 ##################
 
-#def tooLong(signum, frame):
-#    raise Exception("TIMED OUT")
-
-
-#signal.signal(signal.SIGALRM, tooLong)
-
-
-
 def searchForTransceiver():
     msg = False
-#    signal.alarm(10)
     try:
         ser = serial.Serial('/dev/ttyUSB0', 9600)
         msg = str(ser.readline())
-#        signal.alarm(0)
     except Exception, exc:
         print str(exc)
     return HttpResponse(simplejson.dumps({'deviceType' : msg.split('_')[0] }), mimetype='application/javascript')
@@ -414,11 +404,11 @@ def performAction(user, actionType, deviceID, commandID):
 
 def runCommand(deviceNum, commandNum):
     context = {}
-    devices = Devices.objects.filter(id=int(deviceNum))
-    command = Commands.objects.filter(id=int(commandNum))[0]
-    if devices:
-        device = devices[0].getSubclassInstance()
-        if not device.runCommand(command):
+    device = Devices.objects.filter(id=int(deviceNum))
+    command = Commands.objects.filter(id=int(commandNum))
+    if device and command:
+        device = device[0].getSubclassInstance()
+        if not device.runCommand(command[0]):
             context['error'] = "Command Failed to run"
         if 'error' not in context and hasattr(device, 'state'):
             device.state = device.getState()
@@ -437,7 +427,7 @@ def runMacro(macroName, user):
                 runMacro(macro.macro.macroName, user)
             if macro.profile:
                 loadProfile(macro.profile.profileName)
-            else:
+            if macro.command:
                 runCommand(macro.command.device.id, macro.command.id)
 
 def loadProfile(profileName):
