@@ -60,6 +60,7 @@ urlpatterns = patterns('',
 	url(r'^db_admin/$', 'webmote_django.webmote.views.db_admin'),
    	url(r'^transceivers/$', 'webmote_django.webmote.views.transceivers'),
    	url(r'^transceiver_search/$', 'webmote_django.webmote.views.transceiverSearch'),
+    url(r'^autocomplete/(?P<fieldType>[\w|\W]+)/$', 'webmote_django.webmote.views.autocomplete'),
 )
 
 if settings.DEBUG:

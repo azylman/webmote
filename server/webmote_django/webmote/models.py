@@ -231,22 +231,31 @@ class IR_DevicesForm(DevicesForm):
 
 class IR_Commands(Commands):
     code = models.CharField(max_length=200)
-
-    def recordCommand(self, deviceID):
-        print 'Recording...'
-        # get the transciever number and tell it to record
-        transceiverID = '2'
-        command = transceiverID + 'rrr'
-        try:
-            ser = serial.Serial(getIRDongle(), 9600)
-            ser.write(command)
-            self.code = str(ser.readline())
-            print 'Recorded Command Succesfully'
-            return True
-        except:
-            print 'Failed to record'
+    
+    def getTransceiverID(self):
+        transceiver = Transceivers.objects.filter(location=self.device.location)
+        if transceiver:
+            return transceiver[0].id
+        else:
             return False
 
+    def recordCommand(self, deviceID):
+        transceiverID = self.getTransceiverID()
+        if transceiverID:
+            command = str(transceiverID) + 'rrr'
+            try:
+                ser = serial.Serial(getIRDongle(), 9600)
+                ser.write(command)
+                print 'Recording...'
+                self.code = str(ser.readline())
+                print 'Recorded Command Succesfully'
+                return True
+            except:
+                print 'Failed to record'
+                return False
+        else:
+            print 'Failed to record'
+            return False
 
 class IR_CommandsForm(CommandsForm):
     code = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. 1110211'}))

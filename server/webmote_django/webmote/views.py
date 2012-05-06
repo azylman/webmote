@@ -202,6 +202,19 @@ def profiles(request):
     context['profiles'] = unique
     return render_to_response('profiles.html', context, context_instance=RequestContext(request))
 
+@login_required
+def autocomplete(request, fieldType):
+    if 'location' in fieldType:
+        locations = []
+        q = request.GET[u'term']
+        for d in Devices.objects.filter(location__icontains=q):
+            if not d.location in locations:
+                 locations.append(d.location)
+        for t in Transceivers.objects.filter(location__icontains=q):
+            if not t.location in locations:
+                 locations.append(t.location)
+        print q, locations
+        return HttpResponse(simplejson.dumps(locations), mimetype='application/json')
 
 ################
 # Admin Views

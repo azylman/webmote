@@ -142,6 +142,14 @@ $(document).ready(function() {
             $('#newActionSave').fadeIn();
         }
     });
+
+    // Autocomplete
+    $('#id_location').autocomplete({
+        source: '/autocomplete/location/',
+        minLength: 1,
+        select: function (event, ui) { }
+    });
+
 });
 
 function saveNewAction() {
@@ -275,3 +283,10 @@ function searchForTransceiver() {
         }
     });
 }
+
+
+
+//$(function(){
+//  setAutoComplete("id_location", "locationResults", "/autocomplete/location/?query=");
+//});
+
