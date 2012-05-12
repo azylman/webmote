@@ -284,9 +284,3 @@ function searchForTransceiver() {
     });
 }
 
-
-
-//$(function(){
-//  setAutoComplete("id_location", "locationResults", "/autocomplete/location/?query=");
-//});
-
