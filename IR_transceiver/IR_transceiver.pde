@@ -1,6 +1,6 @@
 /* Webmote - Tranceiver Code
 
-Authors: Daniel Myers, Alex Wilson
+Authors: Daniel Myers and Alex Wilson
 
 Description:
 This code runs on all transcievers belonging to the webmote system
@@ -38,6 +38,10 @@ char commandType;
 String data;
 int messageDestination;
 int transceiverID = 0;
+String rawDataString;
+unsigned int rawData[RAWBUF];
+char* codeLenHEX;
+int flag = 0;
 
 // Storage for the recorded code
 int codeType = 0; // The type of code
@@ -70,7 +74,7 @@ void loop() {
             delay(10);
         }
         parseMessage(message);
-        if (transceiverID == messageDestination) {
+        if (transceiverID == messageDestination & flag == 0) {
             switch (commandType) {
                 case 'p':
                     playCommand();
@@ -107,12 +111,49 @@ void restoreID() {
 }
 
 void parseMessage(String message) {
+    // bit 0 - Transciever ID #
     messageDestination = atoi(&message[0]);
+    // bit 1 - Command Type (r, p, d, a, etc.)
     commandType = char(message[1]);
+    // DATA**
     data = message.substring(2);
+    // bit 2 - Data Protocol (NEC, Raw, etc. represented as integer values)
     codeType = atoi(&(message.substring(2,3))[0]);
-    codeLen = atoi(&(message.substring(3,5))[0]);
-    codeValue = atol(&message[5]);
+    // bit 3 and 4 - IR code length as a HEX number
+    codeLen = strtol((&(message.substring(3,5))[0]), &codeLenHEX , 16);
+    // bit 5 to end - IR Code
+    
+    //Serial.print(message);
+    dPrint("\n");
+    if (codeType == 0) {
+      char messageData[codeLen+1];
+            for (int i = 1; i <= (codeLen+1); i++) {
+                messageData[i] = message[i+4];
+                rawData[i] =  int(messageData[i]) - 33;
+                if(rawData[i] > 256 ) {rawData[i] = rawData[i] + 264;}
+                dPrintDEC( rawData[i] );
+                dPrint(" ");
+            }
+            dPrint("\n");
+            
+            
+            for (int i = 1; i <= codeLen; i++) {
+              if (i % 2) {
+                  // Mark
+                  rawCodes[i - 1] = rawData[i]*USECPERTICK - MARK_EXCESS;
+                  dPrint(" m");
+              } 
+              else {
+                  // Space
+                  rawCodes[i - 1] = rawData[i]*USECPERTICK + MARK_EXCESS;
+                  dPrint(" s");
+              }
+              dPrintDEC(rawCodes[i - 1]);
+            }
+            
+            codeValue = 0;
+        }
+    else codeValue = atol(&message[5]);
 
     dPrint("\nParsed Message: \n");
     dPrint("\tDestination: ");
@@ -140,7 +181,14 @@ void parseMessage(String message) {
             break;
     }
     dPrint("\n\tIR Code Data: ");
-    dPrintLONG(codeValue);
+    if (codeType == 0) {
+      for (int i = 1; i <= codeLen; i++) {
+        dPrintDEC(rawData[i]);
+        dPrint(" ");
+      }
+    }
+    else 
+      dPrintLONG(codeValue);
     dPrint("\n\tIR Code Length: ");
     dPrintDEC(codeLen);
     dPrint("\n");
@@ -165,9 +213,24 @@ void recordCommand() {
     // Eventually should add a timeout here
     while (!irrecv.decode(&results)) {}
     storeCode(&results);
+    
+    dPrintDEC(codeType);
+    if(codeType == UNKNOWN) {
+        String dataStringHold;
+        dPrint("\nRaw Code HEX data:\n");
+        Serial.print(String(transceiverID) + String("p") + "0" + String(codeLen,HEX));
+        for (int i = 1; i <= codeLen; i++) {
+                dataStringHold = String(char((&results)->rawbuf[i]));
+                Serial.print(char( ((&results)->rawbuf[i]) + 33));
+        }
+    }
+    
     irrecv.resume();
+    dPrint("\n");
+    dPrintDEC(codeLen);
     dPrint("\nSent to server: ");
-    Serial.println(String(transceiverID) + String("p") + String(codeType) + String(codeLen) + String(codeValue));
+    if(codeType != UNKNOWN)
+        Serial.println(String(transceiverID) + String("p") + String(codeType) + String("0") + String(codeLen,HEX) + String(codeValue));
     digitalWrite(STATUS_PIN, LOW);
 }
 
@@ -184,6 +247,12 @@ void assignID() {
 void dPrint(String str) {
     if (DEBUG) {
         Serial.print(str);
+    }
+}
+
+void dPrintBYTE(byte in) {
+    if (DEBUG) {
+        Serial.print(in, HEX);
     }
 }
 
@@ -319,7 +388,7 @@ void sendCode(int repeat, long int new_code) {
             dPrint("\n");
         }
     }
-    else if (codeType == UNKNOWN /* i.e. raw */) {
+    else if (codeType == 0 /* i.e. raw */) {
         // Assume 38 KHz
         irsend.sendRaw(rawCodes, codeLen, 38);
         dPrint("Sent raw\n");

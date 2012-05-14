@@ -363,7 +363,7 @@ class IR_CommandsForm(CommandsForm):
 
 # This should get called on setup or if there are communication problems. maybe set the value in the db?
 def getIRDongle():
-    return '/dev/ttyUSB0'
+    return '/dev/tty.usbmodem1a21'
 
 
 
