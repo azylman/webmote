@@ -40,9 +40,9 @@ $(document).ready(function() {
 
     $('#edit_remote_slider').change(function() {
         if ($(this).find("option:selected").val() == 'off') {
-            $('.ui-grid-b').children().css('visibility', 'hidden');
+            $('.new_button').css('visibility', 'hidden');
         } else {
-            $('.ui-grid-b').children().css('visibility', 'visible');
+            $('.new_button').css('visibility', 'visible');
         }
     });
 
