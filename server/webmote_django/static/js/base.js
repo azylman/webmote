@@ -38,6 +38,13 @@ $(document).ready(function() {
         }
     });
 
+    $('#edit_remote_slider').change(function() {
+        if ($(this).find("option:selected").val() == 'off') {
+            $('.ui-grid-b').children().css('visibility', 'hidden');
+        } else {
+            $('.ui-grid-b').children().css('visibility', 'visible');
+        }
+    });
 
 
     $('a').attr('rel','external');
@@ -142,12 +149,20 @@ $(document).ready(function() {
             $('#newActionSave').fadeIn();
         }
     });
+
+    // Autocomplete
+    $('#id_location').autocomplete({
+        source: '/autocomplete/location/',
+        minLength: 1,
+        select: function (event, ui) { }
+    });
+
 });
 
 function saveNewAction() {
     $.mobile.loadingMessage = 'Updating Macro';
     $.mobile.showPageLoadingMsg();
-    // Post this actionType
+
     var data = [$('#macroName').text(), 
                 $('#actionType').find("option:selected").val(), 
                 $('#deviceProfileMacro').find("option:selected").val(),
@@ -166,6 +181,33 @@ function saveNewAction() {
     });
     alert('not finished implemented saveNewAction()');
 }
+
+function saveNewButton() {
+    url = '/new_button' + document.URL.split('new_button')[1];
+    $.mobile.loadingMessage = 'Saving Button';
+    $.mobile.showPageLoadingMsg();
+
+    var data = [$('#macroName').text(), 
+                $('#actionType').find("option:selected").val(), 
+                $('#deviceProfileMacro').find("option:selected").val(),
+                $('#deviceCommand').find("option:selected").val(),
+                $('#id_name').val(),
+                $('#id_icon').find("option:selected").val()];
+    
+    // Post this data to backend
+    $.ajax({
+        url: url,
+        type: 'POST',
+        contentType: 'application/json; charset=utf-8',
+        data: JSON.stringify(data),
+        dataType: 'text',
+        success: function(result) {
+            $.mobile.hidePageLoadingMsg();
+            window.location = "/remote/" + url.split('/')[2] + '/';
+        }
+    });
+}
+
 
 function getSelectedProfile() {
     return $('#selectProfile option:selected')[0].value;
@@ -243,5 +285,36 @@ function recordCommand(deviceID) {
             }
         });
     }
+}
+
+
+function searchForTransceiver() {
+    $('#addTransceiverForm').fadeOut();
+    $.mobile.loadingMessage = 'Searching for a new transciever!';
+    $.mobile.showPageLoadingMsg();
+    //First make a request to read in all serial commands and look for ID_REQUEST
+    $.ajax({
+        url: '/transceiver_search/',
+        timeout : 10000,
+        async: true,
+        type: 'GET',
+        contentType: 'application/json; charset=utf-8',
+        dataType: 'text',
+        success: function(returned) {
+            type = $.parseJSON(returned).deviceType;
+            // This if statement doesn't work for some reason
+            if (type.length > 1) {
+                $.mobile.hidePageLoadingMsg();
+                $('input[readonly="True"]').val(type);
+                $('#addTransceiverForm').fadeIn();
+            } else {
+                alert('returned empty');
+            }
+        },
+        error: function(returned) {
+            $.mobile.hidePageLoadingMsg();
+            alert('No transceiver found!');
+        }
+    });
 }
 

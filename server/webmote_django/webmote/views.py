@@ -11,7 +11,7 @@ from django.contrib.auth.views import logout_then_login
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from webmote_django.webmote.models import *
-import serial, sys, os
+import serial, sys, os, signal
 from django.utils import simplejson
 
 # This allows the javascript locater to find the server
@@ -66,9 +66,36 @@ def getActionInfo(request):
         return HttpResponse(simplejson.dumps(macroNames), mimetype='application/javascript')
     return HttpResponse(simplejson.dumps(''), mimetype='application/javascript')
 
+@login_required
+def bookmarkActions(request):
+    context = {}
+    context['devices'] = []
+    for device in getAllowedDevices(request.user.id):
+        device.commands = device.commands_set.all()
+        context['devices'].append(device)
+    context['macros'] = []
+    macroNames = []
+    for macro in Macros.objects.filter(user=request.user):
+        if not macro.macroName in macroNames:
+            context['macros'].append(macro)
+            macroNames.append(macro.macroName)
+    context['profiles'] = []
+    profileNames = []
+    for profile in Profiles.objects.filter(user=request.user):
+        if not profile.profileName in profileNames:
+            context['profiles'].append(profile)
+            profileNames.append(profile.profileName)
+    return render_to_response('bookmark_actions.html', context, context_instance=RequestContext(request))
+
+@login_required
+def bookmark(request, actionType, deviceID, commandID):
+    context = {}
+    context['name'] = performAction(request.user, actionType, deviceID, commandID)
+    return render_to_response('bookmark.html', context, context_instance=RequestContext(request))
 
 @login_required
 def runCommandView(request, deviceNum="1", command="0"):
+    # should be a permissions check here if it isn't already in the runcommand...
     context = runCommand(deviceNum, command)
     return render_to_response('index.html', context, context_instance=RequestContext(request))
 
@@ -176,6 +203,83 @@ def profiles(request):
     context['profiles'] = unique
     return render_to_response('profiles.html', context, context_instance=RequestContext(request))
 
+@login_required
+def remote(request, remoteID):
+    context = {}
+    remote = Remote.objects.filter(id=remoteID)[0]
+    buttons = []
+    assignedButtons = Button.objects.filter(remote=remote)
+    for row in range(0, remote.rows):
+        buttons.append({})
+    for button in assignedButtons:
+        buttons[button.y][str(button.x)] = button
+    if not len(assignedButtons):
+        context['no_assigned_buttons'] = True
+    remote.buttons = buttons
+    context['remote'] = remote
+    return render_to_response('remote.html', context, context_instance=RequestContext(request))
+    
+@login_required
+def remotes(request):
+    context = {}
+    if request.method == 'POST':
+        if 'saveRemote' in request.POST:
+            r = Remote(user=request.user)
+            newRemote = RemoteForm(request.POST, instance=r)
+            if newRemote.is_valid():
+                newRemote.save()
+        if 'deleteRemote' in request.POST:
+            Remote.objects.filter(id=request.POST['deleteRemote']).delete()
+            # delete related buttons here if nec.
+    context['remotes'] = Remote.objects.filter(user=request.user)
+    context['remoteForm'] = RemoteForm()
+    return render_to_response('remotes.html', context, context_instance=RequestContext(request))
+
+@login_required
+def editButton(request, buttonID):
+    context = {}
+    return render_to_response('remotes.html', context, context_instance=RequestContext(request))
+
+@login_required
+def newButton(request, remoteID, y, x):
+    context = {}
+    if request.method == 'POST':
+        data = simplejson.loads(request.raw_post_data)
+        print data
+        name = data[4]
+        icon = data[5]
+        remote = Remote.objects.filter(id=remoteID)[0]
+        if data[1] == 'device':
+            device = Devices.objects.filter(name=data[2])[0]
+            command = Commands.objects.filter(name=data[3], device=device)[0]
+            newButton = Button(name=name, x=x, y=y, command=command, icon=icon, remote=remote)
+            newButton.save()
+        if data[1] == 'profile':
+            profile = Profiles.objects.filter(profileName=data[2])[0]
+            newButton = Button(name=name, x=x, y=y, profile=profile, icon=icon, remote=remote)
+            newButton.save()
+        if data[1] == 'macro':
+            macro = Macros.objects.filter(macroName=data[2])[0]
+            newButton = Button(name=name, x=x, y=y, macro=macro, icon=icon, remote=remote)
+            newButton.save()
+        return redirect('/remote/' + str(remoteID) + '/')
+    context['buttonForm'] = ButtonForm()
+    return render_to_response('new_button.html', context, context_instance=RequestContext(request))
+
+
+@login_required
+def autocomplete(request, fieldType):
+    if 'location' in fieldType:
+        locations = []
+        q = request.GET[u'term']
+        for d in Devices.objects.filter(location__icontains=q):
+            if not d.location in locations:
+                 locations.append(d.location)
+        for t in Transceivers.objects.filter(location__icontains=q):
+            if not t.location in locations:
+                 locations.append(t.location)
+        print q, locations
+        return HttpResponse(simplejson.dumps(locations), mimetype='application/json')
 
 ################
 # Admin Views
@@ -304,9 +408,43 @@ def db_admin(request, userID = "0"):
                         newEntry.save()
         return render_to_response('db_admin.html', context, context_instance=RequestContext(request))
 
+
+@login_required
+def transceivers(request):
+    if request.user.is_superuser:
+        context = {}
+        if request.method == 'POST':
+            if 'addTransceiver' in request.POST:
+                newTForm = TransceiversForm(request.POST)
+                if newTForm.is_valid():
+                    newTran = newTForm.save()
+                    newTran.assignID()
+                else:
+                    context['error'] = "Transciever was invalid."
+            elif 'deleteTransceiver' in request.POST:
+                Transceivers.objects.filter(id=request.POST['deleteTransceiver'])[0].delete()
+        context['transceivers'] = Transceivers.objects.all()
+        context['transceiversForm'] = TransceiversForm()
+        return render_to_response('transceiver.html', context, context_instance=RequestContext(request))
+
+
+@login_required
+def transceiverSearch(request):
+    if request.user.is_superuser:
+        return searchForTransceiver()
+
 ##################
 # Helper Functions 
 ##################
+
+def searchForTransceiver():
+    msg = False
+    try:
+        ser = serial.Serial('/dev/ttyUSB0', 9600)
+        msg = str(ser.readline())
+    except Exception, exc:
+        print str(exc)
+    return HttpResponse(simplejson.dumps({'deviceType' : msg.split('_')[0] }), mimetype='application/javascript')
 
 def getAllowedDevices(userID):
     if User.objects.filter(id=int(userID))[0].is_superuser:
@@ -327,13 +465,28 @@ def setUserPermissions(permissions):
             UserPermissions(user=user, device=device).save()
     return True
 
+def performAction(user, actionType, deviceID, commandID):
+    if 'command' in actionType:
+        runCommand(deviceID, commandID)
+        actionName = Devices.objects.filter(id=deviceID)[0].name + ' - '
+        actionName += Commands.objects.filter(id=commandID)[0].name
+        return actionName
+    if 'macro' in actionType:
+        actionName = Macros.objects.filter(id=deviceID)[0].macroName
+        runMacro(actionName, user)
+        return actionName
+    if 'profile' in actionType:
+        actionName = Profiles.objects.filter(id=deviceID)[0].profileName
+        loadProfile(actionName)
+        return actionName
+
 def runCommand(deviceNum, commandNum):
     context = {}
-    devices = Devices.objects.filter(id=int(deviceNum))
-    command = Commands.objects.filter(id=int(commandNum))[0]
-    if devices:
-        device = devices[0].getSubclassInstance()
-        if not device.runCommand(command):
+    device = Devices.objects.filter(id=int(deviceNum))
+    command = Commands.objects.filter(id=int(commandNum))
+    if device and command:
+        device = device[0].getSubclassInstance()
+        if not device.runCommand(command[0]):
             context['error'] = "Command Failed to run"
         if 'error' not in context and hasattr(device, 'state'):
             device.state = device.getState()
@@ -352,7 +505,7 @@ def runMacro(macroName, user):
                 runMacro(macro.macro.macroName, user)
             if macro.profile:
                 loadProfile(macro.profile.profileName)
-            else:
+            if macro.command:
                 runCommand(macro.command.device.id, macro.command.id)
 
 def loadProfile(profileName):

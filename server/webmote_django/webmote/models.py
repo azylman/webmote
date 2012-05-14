@@ -1,7 +1,7 @@
 from django.db import models
 from django.forms import ModelForm
 from django import forms
-from django.forms.widgets import TextInput, PasswordInput
+from django.forms.widgets import *
 from django.contrib.auth.models import User
 
 import serial, sys, os, glob, time
@@ -55,7 +55,13 @@ class DevicesForm(ModelForm):
     class Meta:
         model = Devices
 
+def getDeviceTypeTuples():
+    deviceTypes = []
+    for deviceType in Devices.__subclasses__():
+        deviceTypes.append((deviceType.__name__.replace('_Devices', ''), deviceType.__name__.replace('_Devices', '')))
+    return deviceTypes
 
+DEVICE_TYPES = getDeviceTypeTuples()
 
 #################
 # Webmote Command
@@ -76,8 +82,136 @@ class CommandsForm(ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. On, Off, etc.'}))
     class Meta:
         model = Commands
-    
 
+################
+# Profiles
+################    
+
+class Profiles(models.Model):
+    profileName = models.CharField(max_length=100)
+    user = models.ForeignKey(User)
+    device = models.ForeignKey(Devices)
+    deviceState = models.CharField(max_length=100)
+    lastCommand = models.IntegerField(null=True)
+
+################
+# Macros
+################
+
+class Macros(models.Model):
+    macroName = models.CharField(max_length=100)
+    command = models.ForeignKey(Commands, null=True)
+    macro = models.ForeignKey('self', null=True)
+    profile = models.ForeignKey(Profiles, null=True)
+    user = models.ForeignKey(User)
+    def runnable(self):
+        return self.command or self.macro or self.profile
+    def getActionName(self):
+        if self.runnable:
+            if self.command:
+                return self.command.device.name + ' - ' + self.command.name
+            if self.macro:
+                return self.macro.macroName
+            if self.profile:
+                return self.profile.profileName
+
+################
+# Transcievers
+################
+
+class Transceivers(models.Model):
+    type = models.CharField(max_length=100, choices=getDeviceTypeTuples())
+    location = models.CharField(max_length=100)
+    def assignID(self, reset = False):
+        try:
+            ser = serial.Serial('/dev/ttyUSB0', 9600)
+            if reset:
+                ser.write(str(self.id) + 'a' + str(0))
+            else:
+                ser.write(str(0) + 'a' + str(self.id))
+#            response = ser.readline()
+            print 'assigned tranceiver id: ' + str(self.id)
+        except Exception, exc:
+            print str(exc)
+        
+    def delete(self, *args, **kwargs):
+        self.assignID(True)
+        print 'resetting transceiver'
+        super(Transceivers, self).delete(*args, **kwargs)
+
+class TransceiversForm(ModelForm):
+    location = forms.CharField(widget=forms.TextInput(attrs={'placeholder' : 'e.g. Kitchen, Den, etc.'}))
+    type = forms.CharField(widget=forms.TextInput(attrs={'readonly' : True}))
+    class Meta:
+        model = Transceivers
+        exclude = ('trans_id',)
+
+
+################
+# Remotes
+################
+
+STYLES = (
+    (1, 'Grid'),
+    (2, 'List (not implemented)'),
+    (3, 'Custom (not implemented)'),
+)
+
+class Remote(models.Model):
+    name = models.CharField(max_length=100)
+    style = models.IntegerField(choices=STYLES)
+    user = models.ForeignKey(User)
+    rows = models.IntegerField()
+
+class RemoteForm(ModelForm):
+    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder' : 'e.g. Watch TV, Lights, etc.'}))
+    style = forms.ChoiceField(choices=STYLES)
+    rows = forms.IntegerField(min_value=1, max_value=20, widget=forms.TextInput(attrs={'placeholder' : 'a number between 1 and 20'}))
+    class Meta:
+        model = Remote
+        exclude = ('user',)
+
+################
+# Buttons
+################
+ICONS = (
+    ('arrow-l', 'Left Arrow'),
+    ('arrow-r', 'Right Arrow'),
+    ('arrow-u', 'Up Arrow'),
+    ('arrow-d', 'Down Arrow'),
+    ('delete', 'Delete'),
+    ('plus', 'Plus'),
+    ('minus', 'Minus'),
+    ('check', 'Check'),
+    ('gear', 'Gear'),
+    ('refresh', 'Refresh'),
+    ('forward', 'Forward'),
+    ('back', 'Back'),
+    ('grid', 'Grid'),
+    ('star', 'Star'),
+    ('alert', 'Alert'),
+    ('info', 'Info'),
+    ('home', 'Home'),
+    ('search', 'Search'),
+)
+
+class Button(models.Model):
+    name = models.CharField(max_length=100, null=True)
+    x = models.IntegerField()
+    y = models.IntegerField()
+    icon = models.CharField(max_length=50, choices=ICONS)
+    command = models.ForeignKey(Commands, null=True)
+    macro = models.ForeignKey(Macros, null=True)
+    profile = models.ForeignKey(Profiles, null=True)
+    url = models.CharField(max_length=1000, null=True)
+    remote = models.ForeignKey(Remote)
+
+class ButtonForm(ModelForm):
+    name = forms.CharField(widget=forms.TextInput(attrs={'placeholder' : 'e.g. Volume Up, Light On, etc.'}))
+    icon = forms.ChoiceField(choices=ICONS)
+    class Meta:
+        model = Button
+        exclude = ('x', 'y', 'command', 'macro', 'profile', 'url', 'remote',)
 
 ################
 # X10
@@ -195,22 +329,31 @@ class IR_DevicesForm(DevicesForm):
 
 class IR_Commands(Commands):
     code = models.CharField(max_length=200)
-
-    def recordCommand(self, deviceID):
-        print 'Recording...'
-        # get the transciever number and tell it to record
-        transceiverID = '2'
-        command = transceiverID + 'rrr'
-        try:
-            ser = serial.Serial(getIRDongle(), 9600)
-            ser.write(command)
-            self.code = str(ser.readline())
-            print 'Recorded Command Succesfully'
-            return True
-        except:
-            print 'Failed to record'
+    
+    def getTransceiverID(self):
+        transceiver = Transceivers.objects.filter(location=self.device.location)
+        if transceiver:
+            return transceiver[0].id
+        else:
             return False
 
+    def recordCommand(self, deviceID):
+        transceiverID = self.getTransceiverID()
+        if transceiverID:
+            command = str(transceiverID) + 'rrr'
+            try:
+                ser = serial.Serial(getIRDongle(), 9600)
+                ser.write(command)
+                print 'Recording...'
+                self.code = str(ser.readline())
+                print 'Recorded Command Succesfully'
+                return True
+            except:
+                print 'Failed to record'
+                return False
+        else:
+            print 'Failed to record'
+            return False
 
 class IR_CommandsForm(CommandsForm):
     code = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'e.g. 1110211'}))
@@ -259,28 +402,4 @@ class UploadDatabaseForm(forms.Form):
 class UserPermissions(models.Model):
     user = models.ForeignKey(User)
     device = models.ForeignKey(Devices)
-
-class Profiles(models.Model):
-    profileName = models.CharField(max_length=100)
-    user = models.ForeignKey(User)
-    device = models.ForeignKey(Devices)
-    deviceState = models.CharField(max_length=100)
-    lastCommand = models.IntegerField(null=True)
-
-class Macros(models.Model):
-    macroName = models.CharField(max_length=100)
-    command = models.ForeignKey(Commands, null=True)
-    macro = models.ForeignKey('self', null=True)
-    profile = models.ForeignKey(Profiles, null=True)
-    user = models.ForeignKey(User)
-    def runnable(self):
-        return self.command or self.macro or self.profile
-    def getActionName(self):
-        if self.runnable:
-            if self.command:
-                return self.command.device.name + ' - ' + self.command.name
-            if self.macro:
-                return self.macro.macroName
-            if self.profile:
-                return self.profile.profileName
 

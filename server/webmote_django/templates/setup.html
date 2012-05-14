@@ -13,70 +13,40 @@ Devices - Home Control
         <div id="devices">
             <h2>Devices</h2>
             {% if devices %}
-            {% if 0 %} 
-<!--            This might be a better format for nonmobile usage??-->
-            <table id="devices_table" border="1">
-                <tr>
-                    {% with devices|first as first_dev %}
-                    {% for field, value in first_dev.get_fields %}
-                    <th>{{ field }}</th>
-                    {% endfor %}
-                    {% endwith %}
-                    <th>Edit</th>
-                    <th>Delete</th>
-                </tr>
-                {% for device in devices %}
-                <tr>
-                    {% for field, value in device.get_fields %}
-                    <td>{{ value }}</td>
-                    {% endfor %}
-                    <td><a href="/device/{{ device.id }}">{{ device.name }} </a></td>
-                    <td>
-                        <form method="post" action="">{% csrf_token %}
-                            <input type="submit" name="deleteDevice" value="Delete" onclick="this.value='{{ device.id }}';this.form.post()"/>
-                        </form>
-                    </td>
-               </tr>
-                {% endfor %}        
-            </table>
-            {% endif %}
-            <div id="devices_grid">
-                <div class="ui-grid-b" id="devices_grid_fields">
-                    <div class="ui-block-a">
-                        <div class="ui-bar ui-bar-a" style="height:30px">Name</div>
-                    </div>
-                    <div class="ui-block-b">
-                        <div class="ui-bar ui-bar-a" style="height:30px">Edit</div>
-                    </div>
-                    <div class="ui-block-c">
-                        <div class="ui-bar ui-bar-a" style="height:30px">Delete</div>
-                    </div>
-                </div>
-                {% for device in devices %}
-                <div class="ui-grid-b" id="devices_grid_row_{{ device.id }}">
-                    <div class="ui-block-a">
-                        <div class="ui-bar ui-bar-a" style="height:30px">{{ device.name }}</div>
-                    </div>
-                    <div class="ui-block-b">
-                        <div class="ui-bar ui-bar-a" style="height:30px"><a href="/device/{{ device.id }}/">Edit</a></div>
-                    </div>
-                    <div class="ui-block-c">
-                        <div class="ui-bar ui-bar-a" style="height:30px">
-                            <form method="post" action="">{% csrf_token %}
-                                <input type="submit" name="deleteDevice" value="Delete" onclick="this.value='{{ device.id }}';this.form.post()"/>
-                            </form>
+                <div id="devices_grid">
+                    <div class="ui-grid-b" id="devices_grid_fields">
+                        <div class="ui-block-a">
+                            <div class="ui-bar ui-bar-a" style="height:30px">Name</div>
+                        </div>
+                        <div class="ui-block-b">
+                            <div class="ui-bar ui-bar-a" style="height:30px">Edit</div>
+                        </div>
+                        <div class="ui-block-c">
+                            <div class="ui-bar ui-bar-a" style="height:30px">Delete</div>
                         </div>
                     </div>
+                    {% for device in devices %}
+                    <div class="ui-grid-b" id="devices_grid_row_{{ device.id }}">
+                        <div class="ui-block-a">
+                            <div class="ui-bar ui-bar-a" style="height:30px">{{ device.name }}</div>
+                        </div>
+                        <div class="ui-block-b">
+                            <div class="ui-bar ui-bar-a" style="height:30px"><a href="/device/{{ device.id }}/">Edit</a></div>
+                        </div>
+                        <div class="ui-block-c">
+                            <div class="ui-bar ui-bar-a" style="height:30px">
+                                <form method="post" action="">{% csrf_token %}
+                                    <input type="submit" name="deleteDevice" value="Delete" onclick="this.value='{{ device.id }}';this.form.post()"/>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
-            </div>
-
             {% else %}
                <h3>Currently there are no devices registered.</h3>
             {% endif %}
         </div>
-
-
 
         <div id="newDeviceType">
             <h2>New Device Type</h2>

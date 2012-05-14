@@ -36,6 +36,8 @@ urlpatterns = patterns('',
 
     # Pages
     url(r'^run_command/(?P<deviceNum>\d+)/(?P<command>\d+)/$', 'webmote_django.webmote.views.runCommandView'),
+    url(r'^bookmark/(?P<actionType>[\w|\W]+)/(?P<deviceID>\d+)/(?P<commandID>\d+)/$', 'webmote_django.webmote.views.bookmark'),
+    url(r'^bookmark_actions/$', 'webmote_django.webmote.views.bookmarkActions'),
     url(r'^record_command/$', 'webmote_django.webmote.views.recordCommand'),
     url(r'^rooms/$', 'webmote_django.webmote.views.rooms'),
     url(r'^help/$', 'webmote_django.webmote.views.help'),
@@ -56,7 +58,13 @@ urlpatterns = patterns('',
     url(r'^logout/$', 'webmote_django.webmote.views.logout_view'),
     url(r'^identification/$', 'webmote_django.webmote.views.identification'),
 	url(r'^db_admin/$', 'webmote_django.webmote.views.db_admin'),
-   
+   	url(r'^transceivers/$', 'webmote_django.webmote.views.transceivers'),
+   	url(r'^transceiver_search/$', 'webmote_django.webmote.views.transceiverSearch'),
+    url(r'^autocomplete/(?P<fieldType>[\w|\W]+)/$', 'webmote_django.webmote.views.autocomplete'),
+    url(r'^new_button/(?P<remoteID>\d+)/(?P<y>\d+)/(?P<x>\d+)/$', 'webmote_django.webmote.views.newButton'),
+    url(r'^edit_button/(?P<buttonID>\d+)/$', 'webmote_django.webmote.views.editButton'),
+    url(r'^remote/(?P<remoteID>\d+)/$', 'webmote_django.webmote.views.remote'),
+    url(r'^remotes/$', 'webmote_django.webmote.views.remotes'),
 )
 
 if settings.DEBUG:

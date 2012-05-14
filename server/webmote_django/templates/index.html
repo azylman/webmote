@@ -17,11 +17,12 @@
 {% else %}
     <div data-role="content">	
         <ul data-role="listview" data-inset="true" id="userOptions">
-            <li><a href="/custom_screens/">Custom Screens(not started)</a></li>
+            <li><a href="/remotes/">Remotes</a></li>
             <li><a href="/rooms/">Rooms</a></li>
             <li><a href="/devices/all">All Devices</a></li>
             <li><a href="/macros/">Macros</a></li>
             <li><a href="/profiles/">Profiles</a></li>
+            <li><a href="/bookmark_actions/">Bookmarks</a></li>
             <li><a href="/help/">Help</a></li>
         </ul>
         {% if user.is_superuser %}
@@ -30,7 +31,8 @@
                 <li><a href="/user_permissions/">Manage User Permissions</a></li>
                 <li><a href="/setup/">Setup Devices</a></li>
                 <li><a href="/admin/">Django Admin</a></li>
-				<li><a href="/db_admin/">IR Database Admin</a></li>
+				<li><a href="/db_admin/">Upload IR Database</a></li>
+                <li><a href="/transceivers/">Manage Transceivers</a></li>
             </ul>
         {% endif %}
     </div>
