@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load url from future %}
+
+{% block title %}
+Macros - Edit Remote
+{% endblock %}
+{% block page_title %}
+    Edit Remote
+{% endblock %}
+
+{% block content %}
+    <div data-role="content">
+        <div id="edit_remote">
+            <h2>{{ remote.name }}</h2>
+            {% for row in remote.buttons %}
+                <div class="ui-grid-b" id="remote_grid_row_{{ row.id }}">
+                    <div class="ui-block-a">
+                        <div class="ui-bar ui-bar-a" style="height:60px">
+                            <a href="/edit_button/{{ button.id }}/">{{ button.name }}</a>
+                        </div>
+                    </div>
+                    <div class="ui-block-b">
+                        <div class="ui-bar ui-bar-a" style="height:60px">
+                            <a href="/edit_button/{{ button.id }}/">{{ button.name }}</a>
+                        </div>
+                    </div>
+                    <div class="ui-block-c">
+                        <div class="ui-bar ui-bar-a" style="height:60px">
+                            <a href="/edit_button/{{ button.id }}/">{{ button.name }}</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        <div>
+    </div>
+{% endblock %}

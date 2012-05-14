@@ -38,6 +38,13 @@ $(document).ready(function() {
         }
     });
 
+    $('#edit_remote_slider').change(function() {
+        if ($(this).find("option:selected").val() == 'off') {
+            $('.ui-grid-b').children().css('visibility', 'hidden');
+        } else {
+            $('.ui-grid-b').children().css('visibility', 'visible');
+        }
+    });
 
 
     $('a').attr('rel','external');
@@ -155,7 +162,7 @@ $(document).ready(function() {
 function saveNewAction() {
     $.mobile.loadingMessage = 'Updating Macro';
     $.mobile.showPageLoadingMsg();
-    // Post this actionType
+
     var data = [$('#macroName').text(), 
                 $('#actionType').find("option:selected").val(), 
                 $('#deviceProfileMacro').find("option:selected").val(),
@@ -174,6 +181,33 @@ function saveNewAction() {
     });
     alert('not finished implemented saveNewAction()');
 }
+
+function saveNewButton() {
+    url = '/new_button' + document.URL.split('new_button')[1];
+    $.mobile.loadingMessage = 'Saving Button';
+    $.mobile.showPageLoadingMsg();
+
+    var data = [$('#macroName').text(), 
+                $('#actionType').find("option:selected").val(), 
+                $('#deviceProfileMacro').find("option:selected").val(),
+                $('#deviceCommand').find("option:selected").val(),
+                $('#id_name').val(),
+                $('#id_icon').find("option:selected").val()];
+    
+    // Post this data to backend
+    $.ajax({
+        url: url,
+        type: 'POST',
+        contentType: 'application/json; charset=utf-8',
+        data: JSON.stringify(data),
+        dataType: 'text',
+        success: function(result) {
+            $.mobile.hidePageLoadingMsg();
+            window.location = "/remote/" + url.split('/')[2] + '/';
+        }
+    });
+}
+
 
 function getSelectedProfile() {
     return $('#selectProfile option:selected')[0].value;

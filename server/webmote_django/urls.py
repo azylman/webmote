@@ -61,6 +61,10 @@ urlpatterns = patterns('',
    	url(r'^transceivers/$', 'webmote_django.webmote.views.transceivers'),
    	url(r'^transceiver_search/$', 'webmote_django.webmote.views.transceiverSearch'),
     url(r'^autocomplete/(?P<fieldType>[\w|\W]+)/$', 'webmote_django.webmote.views.autocomplete'),
+    url(r'^new_button/(?P<remoteID>\d+)/(?P<y>\d+)/(?P<x>\d+)/$', 'webmote_django.webmote.views.newButton'),
+    url(r'^edit_button/(?P<buttonID>\d+)/$', 'webmote_django.webmote.views.editButton'),
+    url(r'^remote/(?P<remoteID>\d+)/$', 'webmote_django.webmote.views.remote'),
+    url(r'^remotes/$', 'webmote_django.webmote.views.remotes'),
 )
 
 if settings.DEBUG:

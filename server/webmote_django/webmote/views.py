@@ -95,6 +95,7 @@ def bookmark(request, actionType, deviceID, commandID):
 
 @login_required
 def runCommandView(request, deviceNum="1", command="0"):
+    # should be a permissions check here if it isn't already in the runcommand...
     context = runCommand(deviceNum, command)
     return render_to_response('index.html', context, context_instance=RequestContext(request))
 
@@ -201,6 +202,70 @@ def profiles(request):
             uniqueNames.append(profile.profileName)
     context['profiles'] = unique
     return render_to_response('profiles.html', context, context_instance=RequestContext(request))
+
+@login_required
+def remote(request, remoteID):
+    context = {}
+    remote = Remote.objects.filter(id=remoteID)[0]
+    buttons = []
+    assignedButtons = Button.objects.filter(remote=remote)
+    for row in range(0, remote.rows):
+        buttons.append({})
+    for button in assignedButtons:
+        buttons[button.y][str(button.x)] = button
+    if not len(assignedButtons):
+        context['no_assigned_buttons'] = True
+    remote.buttons = buttons
+    context['remote'] = remote
+    return render_to_response('remote.html', context, context_instance=RequestContext(request))
+    
+@login_required
+def remotes(request):
+    context = {}
+    if request.method == 'POST':
+        if 'saveRemote' in request.POST:
+            r = Remote(user=request.user)
+            newRemote = RemoteForm(request.POST, instance=r)
+            if newRemote.is_valid():
+                newRemote.save()
+        if 'deleteRemote' in request.POST:
+            Remote.objects.filter(id=request.POST['deleteRemote']).delete()
+            # delete related buttons here if nec.
+    context['remotes'] = Remote.objects.filter(user=request.user)
+    context['remoteForm'] = RemoteForm()
+    return render_to_response('remotes.html', context, context_instance=RequestContext(request))
+
+@login_required
+def editButton(request, buttonID):
+    context = {}
+    return render_to_response('remotes.html', context, context_instance=RequestContext(request))
+
+@login_required
+def newButton(request, remoteID, y, x):
+    context = {}
+    if request.method == 'POST':
+        data = simplejson.loads(request.raw_post_data)
+        print data
+        name = data[4]
+        icon = data[5]
+        remote = Remote.objects.filter(id=remoteID)[0]
+        if data[1] == 'device':
+            device = Devices.objects.filter(name=data[2])[0]
+            command = Commands.objects.filter(name=data[3], device=device)[0]
+            newButton = Button(name=name, x=x, y=y, command=command, icon=icon, remote=remote)
+            newButton.save()
+        if data[1] == 'profile':
+            profile = Profiles.objects.filter(profileName=data[2])[0]
+            newButton = Button(name=name, x=x, y=y, profile=profile, icon=icon, remote=remote)
+            newButton.save()
+        if data[1] == 'macro':
+            macro = Macros.objects.filter(macroName=data[2])[0]
+            newButton = Button(name=name, x=x, y=y, macro=macro, icon=icon, remote=remote)
+            newButton.save()
+        return redirect('/remote/' + str(remoteID) + '/')
+    context['buttonForm'] = ButtonForm()
+    return render_to_response('new_button.html', context, context_instance=RequestContext(request))
+
 
 @login_required
 def autocomplete(request, fieldType):
