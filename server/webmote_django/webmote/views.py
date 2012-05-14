@@ -238,11 +238,18 @@ def remotes(request):
 @login_required
 def editButton(request, buttonID):
     context = {}
-    return render_to_response('remotes.html', context, context_instance=RequestContext(request))
+    if request.method == 'POST':
+        if 'clearButton' in request.POST:
+            b = Button.objects.filter(id=buttonID)[0]
+            remoteID = b.remote.id
+            b.delete()
+            return redirect('/remote/' + str(remoteID) + '/')
+    return render_to_response('button.html', context, context_instance=RequestContext(request))
 
 @login_required
 def newButton(request, remoteID, y, x):
     context = {}
+    context['newButton'] = True
     if request.method == 'POST':
         data = simplejson.loads(request.raw_post_data)
         print data
@@ -264,8 +271,18 @@ def newButton(request, remoteID, y, x):
             newButton.save()
         return redirect('/remote/' + str(remoteID) + '/')
     context['buttonForm'] = ButtonForm()
-    return render_to_response('new_button.html', context, context_instance=RequestContext(request))
+    return render_to_response('button.html', context, context_instance=RequestContext(request))
 
+@login_required
+def runButton(request, buttonID):
+    b = Button.objects.filter(id=buttonID)[0]
+    if b.macro:
+       runMacro(b.macro.macroName, request.user)
+    if b.profile:
+        loadProfile(b.profile.profileName)
+    if b.command:
+        runCommand(b.command.device.id, b.command.id)
+    return HttpResponse(simplejson.dumps(''), mimetype='application/javascript')
 
 @login_required
 def autocomplete(request, fieldType):
@@ -407,7 +424,6 @@ def db_admin(request, userID = "0"):
                         newEntry.parseFromLine(line)
                         newEntry.save()
         return render_to_response('db_admin.html', context, context_instance=RequestContext(request))
-
 
 @login_required
 def transceivers(request):

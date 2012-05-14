@@ -183,7 +183,7 @@ function saveNewAction() {
 }
 
 function saveNewButton() {
-    url = '/new_button' + document.URL.split('new_button')[1];
+    url = '/button' + document.URL.split('button')[1];
     $.mobile.loadingMessage = 'Saving Button';
     $.mobile.showPageLoadingMsg();
 
@@ -316,5 +316,17 @@ function searchForTransceiver() {
             alert('No transceiver found!');
         }
     });
+}
+
+function remoteButton(id) {
+    if ($('#edit_remote_slider').find("option:selected").val() == 'off') {
+        $.ajax({
+            url: '/run_button/' + id + '/',
+            type: 'GET',
+        });
+    } else {
+        window.location = '/button/' + id + '/';
+    }
+   
 }
 
