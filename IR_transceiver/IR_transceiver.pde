@@ -29,7 +29,7 @@ IRsend irsend;
 
 decode_results results;
 
-bool DEBUG = 0;
+bool DEBUG = 1;
 
 char message[MAXMSGLEN];
 char inChar = -1;
@@ -38,6 +38,10 @@ char commandType;
 String data;
 int messageDestination;
 int transceiverID = 0;
+String rawDataString;
+int rawData[MAXMSGLEN*2];
+char* codeLenHEX;
+int flag = 0;
 
 // Storage for the recorded code
 int codeType = 0; // The type of code
@@ -70,7 +74,7 @@ void loop() {
             delay(10);
         }
         parseMessage(message);
-        if (transceiverID == messageDestination) {
+        if (transceiverID == messageDestination & flag == 0) {
             switch (commandType) {
                 case 'p':
                     playCommand();
@@ -107,12 +111,51 @@ void restoreID() {
 }
 
 void parseMessage(String message) {
+    // bit 0 - Transciever ID #
     messageDestination = atoi(&message[0]);
+    // bit 1 - Command Type (r, p, d, a, etc.)
     commandType = char(message[1]);
+    // DATA**
     data = message.substring(2);
+    // bit 2 - Data Protocol (NEC, Raw, etc. represented as integer values)
     codeType = atoi(&(message.substring(2,3))[0]);
-    codeLen = atoi(&(message.substring(3,5))[0]);
-    codeValue = atol(&message[5]);
+    // bit 3 and 4 - IR code length as a HEX number
+    codeLen = strtol((&(message.substring(3,5))[0]), &codeLenHEX , 16);
+    // bit 5 to end - IR Code
+    if (codeType == 0) {
+        if (flag == 0) {
+            for (int i = 1; i <= (codeLen); i++) {
+                rawData[i] = strtol(&(message.substring((i-1)*2+5, (i-1)*2+7))[0], &codeLenHEX, 16);
+                (&results)->rawbuf[i] = rawData[i];
+                // If data string is too large, send out a request for more data and wait for it to return
+                if (rawData[i] == 0) {
+                    Serial.print("\nSend more data: ");
+                    Serial.print((i-1)*2 + 5);
+                    delay(50);
+                    flag = i - 1;
+                    return;
+                }
+            }
+        }
+        else {
+            for (int i = 1; i <= codeLen; i++) {
+              rawData[i+flag] = strtol(&(message.substring((i-1)*2+5, (i-1)*2+7))[0], &codeLenHEX, 16);
+              //(&results)->rawbuf[i+flag] = rawData[i+flag];
+                // If data string is too large, send out a request for more data and wait for it to return
+//                if (rawData[i] == 0) {
+//                    Serial.print("\nSend more data: ");
+//                    Serial.print((i-1)*2 + 5);
+//                    delay(50);
+//                    flag = i - 1 + flag;
+//                    return;
+//                }
+            }
+            codeLen = flag + codeLen;
+            flag = 0;
+        }
+        codeValue = 0;
+    }
+    else codeValue = atol(&message[5]);
 
     dPrint("\nParsed Message: \n");
     dPrint("\tDestination: ");
@@ -140,7 +183,14 @@ void parseMessage(String message) {
             break;
     }
     dPrint("\n\tIR Code Data: ");
-    dPrintLONG(codeValue);
+    if (codeType == 0) {
+      for (int i = 1; i <= codeLen; i++) {
+        dPrintDEC(rawData[i]);
+        dPrint(" ");
+      }
+    }
+    else 
+      dPrintLONG(codeValue);
     dPrint("\n\tIR Code Length: ");
     dPrintDEC(codeLen);
     dPrint("\n");
@@ -165,9 +215,26 @@ void recordCommand() {
     // Eventually should add a timeout here
     while (!irrecv.decode(&results)) {}
     storeCode(&results);
+    
+    dPrintDEC(codeType);
+    if(codeType == UNKNOWN) {
+    String dataStringHold;
+    dPrint("\nRaw Code HEX data:\n");
+    Serial.print(String(transceiverID) + String("p") + "0" + String(codeLen,HEX));
+    for (int i = 1; i <= codeLen; i++) {
+            dataStringHold = String(int((&results)->rawbuf[i]),HEX);
+            if (dataStringHold.length() == 1) {
+                Serial.print("0");
+            }
+            Serial.print(dataStringHold);
+    }
+    dPrint("\n\n");
+    dPrint(rawDataString);
+    }
+    
     irrecv.resume();
     dPrint("\nSent to server: ");
-    Serial.println(String(transceiverID) + String("p") + String(codeType) + String(codeLen) + String(codeValue));
+    Serial.println(String(transceiverID) + String("p") + String(codeType) + String(codeLen,HEX) + String(codeValue));
     digitalWrite(STATUS_PIN, LOW);
 }
 
@@ -184,6 +251,12 @@ void assignID() {
 void dPrint(String str) {
     if (DEBUG) {
         Serial.print(str);
+    }
+}
+
+void dPrintBYTE(byte in) {
+    if (DEBUG) {
+        Serial.print(in, HEX);
     }
 }
 
