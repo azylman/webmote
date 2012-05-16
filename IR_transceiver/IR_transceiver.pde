@@ -165,7 +165,7 @@ void parseMessage(String message) {
     dPrint("\tDestination: ");
     dPrintDEC(messageDestination);
     dPrint("\n\tCommand Type: ");
-    dPrint(commandType);
+    dPrintDEC(commandType);
     dPrint("\n\tIR Protocol: ");
     switch (codeType) {
         case 1:
@@ -221,7 +221,6 @@ void recordCommand() {
     while (!irrecv.decode(&results)) {}
     storeCode(&results);
     
-    dPrintDEC(codeType);
     if(codeType == UNKNOWN) {
         String dataStringHold;
         dPrint("\nRaw Code HEX data:\n");
@@ -233,11 +232,9 @@ void recordCommand() {
     }
     
     irrecv.resume();
-    dPrint("\n");
-    dPrintDEC(codeLen);
     dPrint("\nSent to server: ");
     if(codeType != UNKNOWN)
-        Serial.println(String(transceiverID) + String("p") + String(codeType) + String("0") + String(codeLen,HEX) + String(codeValue));
+        Serial.println(String(transceiverID) + String("p") + String(codeType) + String(codeLen,HEX) + String(codeValue));
     digitalWrite(STATUS_PIN, LOW);
 }
 
