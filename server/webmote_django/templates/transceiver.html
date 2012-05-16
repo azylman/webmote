@@ -60,5 +60,11 @@ Transceivers - Home Control
                 </form>
             </div>
         </div>
+        <div id="resetTransceivers">
+            <h2>Reset All Transceivers</h2>
+            <form method="POST" action="">{% csrf_token %}
+                <input type="submit" name="resetTransceivers" value="Reset All Transceivers" />
+            </form>
+        </div>
     </div>
 {% endblock %}

@@ -439,6 +439,8 @@ def transceivers(request):
                     context['error'] = "Transciever was invalid."
             elif 'deleteTransceiver' in request.POST:
                 Transceivers.objects.filter(id=request.POST['deleteTransceiver'])[0].delete()
+            elif 'resetTransceivers' in request.POST:
+                resetAllTransceivers()
         context['transceivers'] = Transceivers.objects.all()
         context['transceiversForm'] = TransceiversForm()
         return render_to_response('transceiver.html', context, context_instance=RequestContext(request))
@@ -527,3 +529,13 @@ def runMacro(macroName, user):
 def loadProfile(profileName):
     for profile in Profiles.objects.filter(profileName=profileName):
         runCommand(profile.device.id, profile.lastCommand)
+
+def resetAllTransceivers():
+    Transceivers.objects.all().delete()
+    try:
+#        ser = serial.Serial('/dev/ttyACM0', 9600)
+        ser = serial.Serial('/dev/ttyUSB0', 9600)
+        ser.write('reset')
+    except Exception, exc:
+        print str(exc)
+    

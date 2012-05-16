@@ -73,25 +73,31 @@ void loop() {
             }
             delay(10);
         }
-        parseMessage(message);
-        if (transceiverID == messageDestination & flag == 0) {
-            switch (commandType) {
-                case 'p':
-                    playCommand();
-                    break;
-                case 'r':
-                    recordCommand();
-                    break;
-                case 'a':
-                    assignID();
-                    break;
-                case 'd':
-                    DEBUG = !DEBUG;
-                    dPrint("Turned Debug On\n");
-                    break;
-                default:
-                    dPrint("Unrecognized Command");
-                    break;
+        if (String(message) == "reset") {
+            EEPROM.write(0, 0);
+            transceiverID = 0;
+            Serial.println("Transceiver was reset.");
+        } else {
+            parseMessage(message);
+            if (transceiverID == messageDestination & flag == 0) {
+                switch (commandType) {
+                    case 'p':
+                        playCommand();
+                        break;
+                    case 'r':
+                        recordCommand();
+                        break;
+                    case 'a':
+                        assignID();
+                        break;
+                    case 'd':
+                        DEBUG = !DEBUG;
+                        dPrint("Turned Debug On\n");
+                        break;
+                    default:
+                        dPrint("Unrecognized Command");
+                        break;
+                }
             }
         }
         index = 0;
@@ -159,6 +165,7 @@ void parseMessage(String message) {
     dPrint("\tDestination: ");
     dPrintDEC(messageDestination);
     dPrint("\n\tCommand Type: ");
+    dPrint(commandType);
     dPrint("\n\tIR Protocol: ");
     switch (codeType) {
         case 1:

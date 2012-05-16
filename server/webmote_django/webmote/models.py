@@ -126,8 +126,11 @@ class Transceivers(models.Model):
         try:
             ser = serial.Serial('/dev/ttyUSB0', 9600)
             if reset:
+#                ser.write(chr(self.id) + 'a' + str(0))
                 ser.write(str(self.id) + 'a' + str(0))
+                print chr(self.id)
             else:
+#                ser.write(str(0) + 'a' + chr(self.id))
                 ser.write(str(0) + 'a' + str(self.id))
 #            response = ser.readline()
             print 'assigned tranceiver id: ' + str(self.id)
@@ -352,7 +355,7 @@ class IR_Commands(Commands):
                 print 'Failed to record'
                 return False
         else:
-            print 'Failed to record'
+            print 'Couldn\'t find transceiver for device'
             return False
 
 class IR_CommandsForm(CommandsForm):
@@ -363,7 +366,8 @@ class IR_CommandsForm(CommandsForm):
 
 # This should get called on setup or if there are communication problems. maybe set the value in the db?
 def getIRDongle():
-    return '/dev/tty.usbmodem1a21'
+#    return '/dev/tty.usbmodem1a21'
+    return '/dev/ttyUSB0'
 
 
 
