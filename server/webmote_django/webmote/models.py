@@ -349,6 +349,7 @@ class IR_Commands(Commands):
                 ser.write(command)
                 print 'Recording...'
                 self.code = str(ser.readline())
+                print self.code
                 print 'Recorded Command Succesfully'
                 return True
             except:
