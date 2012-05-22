@@ -38,9 +38,8 @@ Webmote - Remotes
                 </div>
             </div>
             {% endfor %}
-
-            <div id="saveMacro">
-                <h3>Create New Remote</h3>
+            <div id="saveRemoteCollapse" data-role="collapsible" data-collapsed="true" data-theme="c" data-content-theme="c">
+                <h2>Create New Remote</h2>
                 <form name="saveRemote" method="POST">{% csrf_token %}
                     {{ remoteForm.as_table }}
                     <input type="submit" name="saveRemote" value="Add Remote" />

@@ -20,7 +20,7 @@
         {% if devices %}
             <ul data-role="listview" data-inset="true">
                 {% for Device in devices %}
-                    <li><a href="/device/{{ Device.id }}">{{ Device.name }} ({{ Device.location }})</a></li>
+                    <li><a href="/device_remote/{{ Device.id }}">{{ Device.name }} ({{ Device.location }})</a></li>
                 {% endfor %}
             </ul>
         {% else %}

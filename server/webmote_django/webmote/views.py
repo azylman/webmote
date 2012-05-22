@@ -206,6 +206,7 @@ def profiles(request):
 @login_required
 def remote(request, remoteID):
     context = {}
+    context['edit'] = True
     remote = Remote.objects.filter(id=remoteID)[0]
     buttons = []
     assignedButtons = Button.objects.filter(remote=remote)
@@ -219,6 +220,29 @@ def remote(request, remoteID):
     context['remote'] = remote
     return render_to_response('remote.html', context, context_instance=RequestContext(request))
     
+@login_required
+def deviceRemote(request, deviceID):
+    context = {}
+    buttons = []
+    context['edit'] = False
+    device = Devices.objects.filter(id=deviceID)[0]
+    commands = Commands.objects.filter(device=device)
+    remote = Remote(name=device.name, style=1, user=request.user)
+    numCommands = len(commands)
+    print numCommands
+    remote.rows = numCommands / 3
+    if numCommands % 3:
+        remote.rows += 1
+    for row in range(0, remote.rows):
+        buttons.append({})
+        for col in range(0, 3):
+            if row * 3 + col < numCommands:
+                command = commands[row * 3 + col]
+                buttons[row][col] = Button(name=command.name, icon='star', command=command, id='command/' + str(command.id))
+    remote.buttons = buttons
+    context['remote'] = remote
+    return render_to_response('remote.html', context, context_instance=RequestContext(request))
+
 @login_required
 def remotes(request):
     context = {}
@@ -282,6 +306,13 @@ def runButton(request, buttonID):
         loadProfile(b.profile.profileName)
     if b.command:
         runCommand(b.command.device.id, b.command.id)
+    return HttpResponse(simplejson.dumps(''), mimetype='application/javascript')
+
+@login_required
+def commandButton(request, commandID):
+    command = Commands.objects.filter(id=commandID)[0]
+    device = command.device
+    runCommand(device.id, command.id)
     return HttpResponse(simplejson.dumps(''), mimetype='application/javascript')
 
 @login_required
