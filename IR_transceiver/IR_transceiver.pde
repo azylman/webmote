@@ -229,6 +229,7 @@ void recordCommand() {
                 dataStringHold = String(char((&results)->rawbuf[i]));
                 Serial.print(char( ((&results)->rawbuf[i]) + 33));
         }
+        Serial.print("\n");
     }
     
     irrecv.resume();

@@ -10,66 +10,75 @@
 
 {% block content %}
     <div data-role="content">
-        <div id="device">
-            <form method="post" action="">{% csrf_token %}
-                {{ deviceForm.as_table }}
-                <input type="submit" name="updateDevice" value="Update Device Info" />
-            </form>
-        </div>
-        <div id="availableCommands">
-            <h2>Available Commands</h2>
-            {% if commands %}
-                <div id="commands_grid">
-                    <div class="ui-grid-b" id="commands_grid_fields">
-                        <div class="ui-block-a">
-                            <div class="ui-bar ui-bar-a" style="height:30px">Name</div>
-                        </div>
-                        <div class="ui-block-b">
-                            <div class="ui-bar ui-bar-a" style="height:30px">Test</div>
-                        </div>
-                        <div class="ui-block-c">
-                            <div class="ui-bar ui-bar-a" style="height:30px">Delete</div>
-                        </div>
-                    </div>
-                    {% for command in commands %}
-                    <div class="ui-grid-b" id="commands_grid_row_{{ command.id }}">
-                        <div class="ui-block-a">
-                            <div class="ui-bar ui-bar-a" style="height:30px">{{ command.name }}</div>
-                        </div>
-                        <div class="ui-block-b">
-                            <div class="ui-bar ui-bar-a" style="height:30px">
-                                <a href="#" data-role="button" data-theme="a" onclick="runCommand('/run_command/{{ device.id }}/{{ command.id }}/')">Test</a>
-                            </div>
-                        </div>
-                        <div class="ui-block-c">
-                            <div class="ui-bar ui-bar-a" style="height:30px">
-                                <form method="post" action="">{% csrf_token %}
-                                    <input type="submit" name="deleteCommand" value="Delete" onclick="this.value='{{ command.id }}';this.form.post()"/>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <h3>Currently there are no commands.</h3>
-            {% endif %}
-        </div>
-        <div id="addCommand">
-            <h2>Add a custom command manually</h2>
-            <form method="POST" action="">{% csrf_token %}
-                {{ commandForm.as_table }}
-                <input type="submit" name="addCommand" value="Add Command" />
-            </form>
-        </div>
         {% if recordable %}
-        <div id="recordCommandDiv">
-            <h2>Or record a command</h2>
-            <form>
-                Name: <input type="text" id="recordCommandName" placeholder="e.g. On, Off, etc."/>
-            </form>
-            <a href="#" data-role="button" data-theme="c" onclick="recordCommand({{ device.id }})">Record Command</a>
+        <div id="recordCommandCollapse" data-role="collapsible" data-collapsed="true" data-theme="c" data-content-theme="c">
+            <h2>Record a command</h2>
+            <div id="recordCommandDiv">
+                <form>
+                    Name: <input type="text" id="recordCommandName" placeholder="e.g. On, Off, etc."/>
+                </form>
+                <a href="#" data-role="button" data-theme="c" onclick="recordCommand({{ device.id }})">Record Command</a>
+            </div>
         </div>
         {% endif %}
+        <div id="addCommandCollapse" data-role="collapsible" data-collapsed="true" data-theme="c" data-content-theme="c">
+            <h2>Add a command manually</h2>
+            <div id="addCommand">
+                <form method="POST" action="">{% csrf_token %}
+                    {{ commandForm.as_table }}
+                    <input type="submit" name="addCommand" value="Add Command" />
+                </form>
+            </div>
+        </div>
+        <div id="availableCommandsCollapse" data-role="collapsible" data-collapsed="true" data-theme="c" data-content-theme="c">
+            <h2>Available Commands</h2>
+            <div id="availableCommands">
+                {% if commands %}
+                    <div id="commands_grid">
+                        <div class="ui-grid-b" id="commands_grid_fields">
+                            <div class="ui-block-a">
+                                <div class="ui-bar ui-bar-a" style="height:30px">Name</div>
+                            </div>
+                            <div class="ui-block-b">
+                                <div class="ui-bar ui-bar-a" style="height:30px">Test</div>
+                            </div>
+                            <div class="ui-block-c">
+                                <div class="ui-bar ui-bar-a" style="height:30px">Delete</div>
+                            </div>
+                        </div>
+                        {% for command in commands %}
+                        <div class="ui-grid-b" id="commands_grid_row_{{ command.id }}">
+                            <div class="ui-block-a">
+                                <div class="ui-bar ui-bar-a" style="height:30px">{{ command.name }}</div>
+                            </div>
+                            <div class="ui-block-b">
+                                <div class="ui-bar ui-bar-a" style="height:30px">
+                                    <a href="#" data-role="button" data-theme="a" onclick="runCommand('/run_command/{{ device.id }}/{{ command.id }}/')">Test</a>
+                                </div>
+                            </div>
+                            <div class="ui-block-c">
+                                <div class="ui-bar ui-bar-a" style="height:30px">
+                                    <form method="post" action="">{% csrf_token %}
+                                        <input type="submit" name="deleteCommand" value="Delete" onclick="this.value='{{ command.id }}';this.form.post()"/>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <h3>Currently there are no commands.</h3>
+                {% endif %}
+            </div>
+        </div>
+        <div id="deviceCollapse" data-role="collapsible" data-collapsed="true" data-theme="c" data-content-theme="c">
+            <h2>Edit Device</h2>
+            <div id="device">
+                <form method="post" action="">{% csrf_token %}
+                    {{ deviceForm.as_table }}
+                    <input type="submit" name="updateDevice" value="Update Device Info" />
+                </form>
+            </div>
+        </div>
     </div>
 {% endblock %}
