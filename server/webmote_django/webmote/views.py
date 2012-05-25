@@ -26,6 +26,7 @@ def identification(request):
     else:
         return render_to_response('fail.html')
 
+@login_required
 def logout_view(request):
     logout(request)
     return redirect('/')
