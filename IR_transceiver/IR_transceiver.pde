@@ -32,6 +32,7 @@ decode_results results;
 bool DEBUG = 0;
 
 char message[MAXMSGLEN];
+char message2[MAXMSGLEN];
 char inChar = -1;
 int index = 0;
 char commandType;
@@ -40,6 +41,8 @@ int messageDestination;
 int transceiverID = 0;
 String rawDataString;
 unsigned int rawData[RAWBUF];
+int rawDataBit0;
+int rawDataBit1;
 char* codeLenHEX;
 int flag = 0;
 
@@ -71,7 +74,7 @@ void loop() {
                 message[index++] = inChar;
                 message[index] = '\0';
             }
-            delay(10);
+            delay(5); //When set to 10, this delay causes the serial buffer to overflow and drop the final bits of the serial string. If this is set to 1, we don't get the last digit
         }
         if (String(message) == "reset") {
             EEPROM.write(0, 0);
@@ -132,13 +135,10 @@ void parseMessage(String message) {
     //Serial.print(message);
     dPrint("\n");
     if (codeType == 0) {
-      char messageData[codeLen+1];
-            for (int i = 1; i <= (codeLen+1); i++) {
-                messageData[i] = message[i+4];
-                rawData[i] =  int(messageData[i]) - 33;
-                if(rawData[i] > 256 ) {rawData[i] = rawData[i] + 264;}
-                dPrintDEC( rawData[i] );
-                dPrint(" ");
+      char messageData[codeLen];
+            for (int i = 1; i <= (codeLen); i++) {
+                rawDataBit1 = strtol((&(message.substring( (i-1)*2+5 , (i-1)*2+7 ))[0]), &codeLenHEX , 16);
+                rawData[i] =  rawDataBit1;
             }
             dPrint("\n");
             
@@ -209,6 +209,8 @@ void playCommand() {
     dPrint("\n");
 
     sendCode(0, codeValue);
+    delay(100);
+    Serial.flush();
 
     digitalWrite(STATUS_PIN, LOW);
 }
@@ -227,8 +229,10 @@ void recordCommand() {
         Serial.print(String(transceiverID) + String("p") + "0" + String(codeLen,HEX));
         for (int i = 1; i <= codeLen; i++) {
                 dataStringHold = String(char((&results)->rawbuf[i]));
-                Serial.print(char( ((&results)->rawbuf[i]) + 33));
+                if( int((&results)->rawbuf[i]) < 16 ) {Serial.print("0");}
+                Serial.print(( ((&results)->rawbuf[i]) ), HEX);
         }
+        Serial.print("\n");
     }
     
     irrecv.resume();
@@ -298,7 +302,9 @@ void parseIRData(String data) {
 // Most of this code is just logging
 void storeCode(decode_results *results) {
     codeType = results->decode_type;
+    codeType = UNKNOWN;
     int count = results->rawlen;
+    //codeType = UNKNOWN;
     if (codeType == UNKNOWN) {
         dPrint("Received unknown code, saving as raw\n");
         codeLen = results->rawlen - 1;
