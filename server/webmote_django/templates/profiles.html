@@ -51,10 +51,11 @@ Profiles - Home Control
                 </div>
             </div>
             {% endfor %}
-            <div id="saveProfile">
-                <h3>Save Current State as New Profile</h3>
+            <div id="saveProfileCollapse" data-role="collapsible" data-collapsed="true" data-theme="c" data-content-theme="c">
+                <h2>Save current state as a new profile</h2>
                 <form name="saveProfile" method="POST">{% csrf_token %}
-                    <input name="profileName" type="text" placeholder="i.e. Morning, Evening, etc.">
+                    <label for="profileNameInput">Profile Name</label>
+                    <input id="profileNameInput" name="profileName" type="text" placeholder="i.e. Morning, Evening, etc.">
                     <input name="saveProfile" type="submit" value="Save">
                 </form>
             </div>

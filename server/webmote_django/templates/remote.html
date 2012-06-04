@@ -10,12 +10,14 @@
 
 {% block content %}
     <div data-role="content">
-        <div id="edit_remote">
-            <select name="slider" id="edit_remote_slider" data-role="slider">
-	            <option value="off">Edit Off</option>
-	            <option value="on">Edit On</option>
-            </select>
-        </div>
+        {% if edit %}
+            <div id="edit_remote">
+                <select name="slider" id="edit_remote_slider" data-role="slider">
+	                <option value="off">Edit Off</option>
+	                <option value="on">Edit On</option>
+                </select>
+            </div>
+        {% endif %}
         </br>
         <div id="remote">
             {% for row in remote.buttons %}
@@ -23,7 +25,7 @@
                     {% if row.0 %}
                         <div class="ui-block-a">
                             <div class="ui-bar" style="height:60px">
-                                <a href="#" data-icon="{{row.0.icon}}" data-iconpos="bottom" style="height:100%; width:100%" onclick="remoteButton({{ row.0.id }})">{{ row.0.name }}</a>
+                                <a href="#" data-icon="{{row.0.icon}}" data-iconpos="bottom" style="height:100%; width:100%" onclick="remoteButton('{{ row.0.id }}')">{{ row.0.name }}</a>
                             </div>
                         </div>
                     {% else %}
@@ -37,7 +39,7 @@
                     {% if row.1 %}
                         <div class="ui-block-b">
                             <div class="ui-bar" style="height:60px">
-                                <a href="#" data-icon="{{row.1.icon}}" data-iconpos="bottom" style="height:100%; width:100%" onclick="remoteButton({{ row.1.id }})">{{ row.1.name }}</a>
+                                <a href="#" data-icon="{{row.1.icon}}" data-iconpos="bottom" style="height:100%; width:100%" onclick="remoteButton('{{ row.1.id }}')">{{ row.1.name }}</a>
                             </div>
                         </div>
                     {% else %}
@@ -51,7 +53,7 @@
                     {% if row.2 %}
                         <div class="ui-block-c">
                             <div class="ui-bar" style="height:60px">
-                                <a href="#" data-icon="{{row.2.icon}}" data-iconpos="bottom" style="height:100%; width:100%" onclick="remoteButton({{ row.2.id }})">{{ row.2.name }}</a>
+                                <a href="#" data-icon="{{row.2.icon}}" data-iconpos="bottom" style="height:100%; width:100%" onclick="remoteButton('{{ row.2.id }}')">{{ row.2.name }}</a>
                             </div>
                         </div>
                     {% else %}

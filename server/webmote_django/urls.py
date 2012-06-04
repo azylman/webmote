@@ -19,22 +19,9 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
 
-    url(
-        r'^accounts/login/$','django.contrib.auth.views.login',
-        dict(
-            template_name = 'jqm/login.html',
-        ),
-        name='login',
-    ),
-    url(
-        r'^accounts/logout/$','django.contrib.auth.views.logout',
-        dict(
-            template_name = 'jqm/logout.html',
-        ),
-        name='logout',
-    ),
-
     # Pages
+    url(r'^accounts/login$', 'django.contrib.auth.views.login'),
+    url(r'^accounts/logout/$','webmote_django.webmote.views.logout_view'),
     url(r'^run_command/(?P<deviceNum>\d+)/(?P<command>\d+)/$', 'webmote_django.webmote.views.runCommandView'),
     url(r'^bookmark/(?P<actionType>[\w|\W]+)/(?P<deviceID>\d+)/(?P<commandID>\d+)/$', 'webmote_django.webmote.views.bookmark'),
     url(r'^bookmark_actions/$', 'webmote_django.webmote.views.bookmarkActions'),
@@ -63,8 +50,10 @@ urlpatterns = patterns('',
     url(r'^autocomplete/(?P<fieldType>[\w|\W]+)/$', 'webmote_django.webmote.views.autocomplete'),
     url(r'^button/(?P<remoteID>\d+)/(?P<y>\d+)/(?P<x>\d+)/$', 'webmote_django.webmote.views.newButton'),
     url(r'^button/(?P<buttonID>\d+)/$', 'webmote_django.webmote.views.editButton'),
+    url(r'^run_button/command/(?P<commandID>\d+)/$', 'webmote_django.webmote.views.commandButton'),
     url(r'^run_button/(?P<buttonID>\d+)/$', 'webmote_django.webmote.views.runButton'),
     url(r'^remote/(?P<remoteID>\d+)/$', 'webmote_django.webmote.views.remote'),
+    url(r'^device_remote/(?P<deviceID>\d+)/$', 'webmote_django.webmote.views.deviceRemote'),
     url(r'^remotes/$', 'webmote_django.webmote.views.remotes'),
 )
 

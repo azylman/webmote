@@ -319,13 +319,13 @@ function searchForTransceiver() {
 }
 
 function remoteButton(id) {
-    if ($('#edit_remote_slider').find("option:selected").val() == 'off') {
+    if ($('#edit_remote_slider').find("option:selected").val() == 'on') {
+        window.location = '/button/' + id + '/';
+    } else {
         $.ajax({
             url: '/run_button/' + id + '/',
             type: 'GET',
         });
-    } else {
-        window.location = '/button/' + id + '/';
     }
    
 }

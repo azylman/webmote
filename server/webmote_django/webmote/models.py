@@ -346,9 +346,13 @@ class IR_Commands(Commands):
             command = str(transceiverID) + 'rrr'
             try:
                 ser = serial.Serial(getIRDongle(), 9600)
+#                ser.flush()                
+#                ser.flushInput()
+#                ser.flushOutput()
                 ser.write(command)
                 print 'Recording...'
                 self.code = str(ser.readline())
+                print self.code
                 print 'Recorded Command Succesfully'
                 return True
             except:

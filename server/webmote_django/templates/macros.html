@@ -56,10 +56,11 @@ Macros - Home Control
                 </div>
             </div>
             {% endfor %}
-            <div id="saveMacro">
-                <h3>Create New Macro</h3>
+            <div id="saveMacroCollapse" data-role="collapsible" data-collapsed="true" data-theme="c" data-content-theme="c">
+                <h2>Create New Macro</h2>
                 <form name="saveMacro" method="POST">{% csrf_token %}
-                    <input name="macroName" type="text" placeholder="i.e. Watch ESPN, Listen to Music, etc.">
+                    <label for="macroNameInput">Macro Name</label>
+                    <input id="macroNameInput" name="macroName" type="text" placeholder="i.e. Watch ESPN, Listen to Music, etc.">
                     <input name="saveMacro" type="submit" value="Save">
                 </form>
             </div>
