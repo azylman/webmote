@@ -344,7 +344,9 @@ def navMedia(request, address = ''):
     if os.path.isdir(curDir):
         for ff in os.listdir(curDir):
             if ff[0] != '.':
-                context['folders'].append(type('obj', (object,), {'name' : ff, 'url' : address + ff}))     
+                f = type('obj', (object,), {'name' : ff, 'url' : address + ff})
+                if os.path.isdir(os.path.join(curDir, ff)):
+                    context['folders'].append(f)     
         return render_to_response('nav_media.html', context, context_instance=RequestContext(request))
     if os.path.isfile(curDir):
         return render_to_response('control_media.html', context, context_instance=RequestContext(request))        

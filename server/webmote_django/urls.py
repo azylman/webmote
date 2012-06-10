@@ -56,7 +56,7 @@ urlpatterns = patterns('',
     url(r'^device_remote/(?P<deviceID>\d+)/$', 'webmote_django.webmote.views.deviceRemote'),
     url(r'^remotes/$', 'webmote_django.webmote.views.remotes'),
     # Media server
-    url(r'^navigate_media/$', 'webmote_django.webmote.views.navMedia'),
+    url(r'^navigate_media/(.*)$', 'webmote_django.webmote.views.navMedia'),
 )
 
 if settings.DEBUG:

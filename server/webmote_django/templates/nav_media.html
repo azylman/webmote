@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load url from future %}
+
+{% block title %}
+Media - Home Control
+{% endblock %}
+{% block page_title %}
+    Navigate Media
+{% endblock %}
+
+{% block content %}
+    <div data-role="content">
+        <a href=".." data-role="button" data-theme="c">Go Up</a>
+        <div id="folders">
+            <h2>Folders</h2>
+            {% if folders %}
+                {% for folder in folders %}
+                    <a href="/navigate_media/{{ folder.url }}/" data-role="button" data-theme="c">{{ folder.name }}</a>
+                {% endfor %}
+            {% else %}
+                <p>No folders found.</p>
+            {% endif %}
+        </div>
+        <div id="files">
+            <h2>Files</h2>
+            {% if files %}
+                {% for file in files %}
+                    <a href="/navigate_media/{{ file.url }}" data-role="button" data-theme="c">{{ file.name }}</a>
+                {% endfor %}
+            {% else %}
+                <p>No compatible files found.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

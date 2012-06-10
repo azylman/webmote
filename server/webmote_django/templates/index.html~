@@ -22,7 +22,6 @@
             <li><a href="/devices/all">All Devices</a></li>
             <li><a href="/macros/">Macros</a></li>
             <li><a href="/profiles/">Profiles</a></li>
-            <li><a href="navigate_media/">Media</a></li>
             <li><a href="/bookmark_actions/">Bookmarks</a></li>
             <li><a href="/help/">Help</a></li>
         </ul>
