@@ -57,6 +57,7 @@ urlpatterns = patterns('',
     url(r'^remotes/$', 'webmote_django.webmote.views.remotes'),
     # Media server
     url(r'^navigate_media/(.*)$', 'webmote_django.webmote.views.navMedia'),
+    url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT,})
 )
 
 if settings.DEBUG:

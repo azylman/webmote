@@ -11,9 +11,14 @@ Media - Home Control
 {% block content %}
     <div data-role="content">
         <a href=".." data-role="button" data-theme="c">Go Up</a>
-        <a href="" data-role="button" data-theme="c">Download (not implemented)</a>
+      <!--  <a href="" data-role="button" data-theme="c">Download (not implemented)</a> -->
         <div id="media-player">
-
+            <video height="100%" width="100%" controls="controls">
+                <source src="/media/{{ url }}" type ="video/avi"/>
+                Your browser does not support the video tag.
+            </video>
         </div>
     </div>
 {% endblock %}
+
+<!-- type ="video/avi" -->
